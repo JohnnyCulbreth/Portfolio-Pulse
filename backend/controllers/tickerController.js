@@ -1,11 +1,16 @@
 const asyncHandler = require('express-async-handler');
+const { tick } = require('mongoose/lib/utils');
+
+const Ticker = require('../models/tickerModel');
 
 // @description - Get tickers
 // @route - GET /api/tickers
 // @access - Private
 
 const getTickers = asyncHandler(async (req, res) => {
-  res.status(200).json({ message: 'Get Ticker' });
+  const tickers = await Ticker.find();
+
+  res.status(200).json(tickers);
 });
 
 // @description - Set tickers
@@ -17,8 +22,11 @@ const setTicker = asyncHandler(async (req, res) => {
     res.status(400);
     throw new Error('Please add a text field');
   }
+  const ticker = await Ticker.create({
+    text: req.body.text,
+  });
 
-  res.status(200).json({ message: 'Set Ticker' });
+  res.status(200).json(ticker);
 });
 
 // @description - Update tickers
@@ -26,7 +34,20 @@ const setTicker = asyncHandler(async (req, res) => {
 // @access - Private
 
 const updateTickers = asyncHandler(async (req, res) => {
-  res.status(200).json({ message: `Update ticker ${req.params.id}` });
+  const ticker = await Ticker.findById(req.params.id);
+
+  if (!ticker) {
+    res.status(400);
+    throw new Error('Ticker not found');
+  }
+
+  const updatedTicker = await Ticker.findByIdAndUpdate(
+    req.params.id,
+    req.body,
+    { new: true }
+  );
+
+  res.status(200).json(updatedTicker);
 });
 
 // @description - Delete tickers
@@ -34,7 +55,16 @@ const updateTickers = asyncHandler(async (req, res) => {
 // @access - Private
 
 const deleteTicker = asyncHandler(async (req, res) => {
-  res.status(200).json({ message: `Delete ticker ${req.params.id}` });
+  const ticker = await Ticker.findById(req.params.id);
+
+  if (!ticker) {
+    res.status(400);
+    throw new Error('Ticker not found');
+  }
+
+  await ticker.remove();
+
+  res.status(200).json({ id: req.params.id });
 });
 
 module.exports = {
