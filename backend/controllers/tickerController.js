@@ -43,16 +43,14 @@ const updateTickers = asyncHandler(async (req, res) => {
     throw new Error('Ticker not found');
   }
 
-  const user = await User.findById(req.user.id);
-
   // Check for user
-  if (!user) {
+  if (!req.user) {
     res.status(401);
     throw new Error('User not found');
   }
 
   // Make sure the logged in user matches the ticker user
-  if (ticker.user.toString() !== user.id) {
+  if (ticker.user.toString() !== req.user.id) {
     res.status(401);
     throw new Error('User not authorized');
   }
@@ -78,16 +76,14 @@ const deleteTicker = asyncHandler(async (req, res) => {
     throw new Error('Ticker not found');
   }
 
-  const user = await User.findById(req.user.id);
-
   // Check for user
-  if (!user) {
+  if (!req.user) {
     res.status(401);
     throw new Error('User not found');
   }
 
   // Make sure the logged in user matches the ticker user
-  if (ticker.user.toString() !== user.id) {
+  if (ticker.user.toString() !== req.user.id) {
     res.status(401);
     throw new Error('User not authorized');
   }
