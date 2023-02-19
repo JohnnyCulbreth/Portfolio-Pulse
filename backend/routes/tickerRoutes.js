@@ -7,7 +7,9 @@ const {
   deleteTicker,
 } = require('../controllers/tickerController');
 
-router.route('/').get(getTickers).post(setTicker);
-router.route('/:id').delete(deleteTicker).put(updateTickers);
+const { protect } = require('../middleware/authMiddleware');
+
+router.route('/').get(protect, getTickers).post(protect, setTicker);
+router.route('/:id').delete(protect, deleteTicker).put(protect, updateTickers);
 
 module.exports = router;
