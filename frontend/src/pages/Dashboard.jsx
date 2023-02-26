@@ -4,7 +4,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import TickerForm from '../components/TickerForm';
 import TickerItem from '../components/TickerItem';
 import Spinner from '../components/Spinner';
-import { getTickers, reset } from '../features/tickers/tickerSlice';
+import { getTickers } from '../features/tickers/tickerSlice';
 
 function Dashboard() {
   const navigate = useNavigate();
