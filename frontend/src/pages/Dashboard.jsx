@@ -5,6 +5,7 @@ import TickerForm from '../components/TickerForm';
 import TickerItem from '../components/TickerItem';
 import Spinner from '../components/Spinner';
 import { getTickers } from '../features/tickers/tickerSlice';
+import Portfolio from '../components/Portfolio/Portfolio';
 
 function Dashboard() {
   const navigate = useNavigate();
