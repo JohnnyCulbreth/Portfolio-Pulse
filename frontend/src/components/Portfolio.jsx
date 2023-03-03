@@ -12,7 +12,7 @@ import TextField from '@mui/material/TextField';
 import AddBoxIcon from '@mui/icons-material/AddBox';
 import { Container } from '@mui/system';
 import { Box } from '@mui/material';
-import { fetchStockInfo } from '../../services/fetchStockFromAPI';
+import { fetchStockInfo } from '../services/fetchStockFromAPI';
 
 function Portfolio() {
   const [ticker, setTicker] = useState('');
