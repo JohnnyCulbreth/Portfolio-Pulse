@@ -13,12 +13,23 @@ import AddBoxIcon from '@mui/icons-material/AddBox';
 import { Container } from '@mui/system';
 import { Box } from '@mui/material';
 import { fetchStockInfo } from '../services/fetchStockFromAPI';
+import {
+  addPosition,
+  updatePosition,
+} from '../features/portfolio/portfolioSlice';
+import { connect, useDispatch } from 'react-redux';
+import { createPosition } from '../app/store';
 
-function Portfolio() {
+function Portfolio({ positions, addPosition, updatePosition }) {
   const [ticker, setTicker] = useState('');
   const [entryPrice, setEntryPrice] = useState(0);
   const [numShares, setNumShares] = useState(0);
-  const [portfolio, setPortfolio] = useState([]);
+
+  const dispatch = useDispatch();
+
+  if (!positions) {
+    return <div>Loading...</div>;
+  }
 
   const handleTickerChange = (event) => {
     setTicker(event.target.value);
@@ -32,88 +43,47 @@ function Portfolio() {
     setNumShares(event.target.value);
   };
 
-  const handleAddStock = async () => {
-    try {
-      const stockInfo = await fetchStockInfo({ ticker });
-      const { latestPrice } = stockInfo;
-      const costBasis = (entryPrice * numShares) / numShares;
-      const marketPrice = latestPrice;
-      const paidValue = costBasis * numShares;
-      const marketValue = marketPrice * numShares;
-      const dailyPercent = (stockInfo.changePercent * 10).toFixed(2);
-      const dailyPnl = stockInfo.change * numShares;
-      const overallPerformance = marketValue - paidValue;
-      const overallPercent = (marketValue - paidValue) / paidValue;
-      const existingIndex = portfolio.findIndex(
-        (position) => position.ticker === ticker
-      );
-      if (existingIndex >= 0) {
-        const existingPosition = portfolio[existingIndex];
-        const updatedPosition = {
-          ...existingPosition,
-          numShares: Number(existingPosition.numShares) + Number(numShares),
-          costBasis:
-            (existingPosition.paidValue + paidValue) /
-            (Number(existingPosition.numShares) + Number(numShares)),
-          marketPrice: marketPrice,
-          paidValue: existingPosition.paidValue + paidValue,
-          marketValue: existingPosition.marketValue + marketValue,
-          dailyPercent: dailyPercent,
-          dailyPnl: existingPosition.dailyPnl + dailyPnl,
-          overallPerformance:
-            existingPosition.overallPerformance + overallPerformance,
-          overallPercent:
-            existingPosition.paidValue + paidValue !== 0
-              ? (existingPosition.marketValue +
-                  marketValue -
-                  (existingPosition.paidValue + paidValue)) /
-                (existingPosition.paidValue + paidValue)
-              : 0,
-          portfolioWeight: calculatePortfolioWeight(
-            existingPosition.marketValue + marketValue
-          ),
-        };
-        const updatedPortfolio = [...portfolio];
-        updatedPortfolio[existingIndex] = updatedPosition;
-        setPortfolio(updatedPortfolio);
-      } else {
-        const totalValue = calculateTotalValue(
-          portfolio.concat([{ ticker, numShares, marketValue }])
-        );
-        const portfolioWeight = ((marketValue / totalValue) * 100).toFixed(2);
-        setPortfolio(
-          portfolio.concat([
-            {
-              ticker,
-              numShares,
-              costBasis,
-              marketPrice,
-              paidValue,
-              marketValue,
-              dailyPercent,
-              dailyPnl,
-              overallPerformance,
-              overallPercent,
-              portfolioWeight,
-            },
-          ])
-        );
-      }
-      setTicker('');
-      setEntryPrice(0);
-      setNumShares(0);
-    } catch (error) {
-      console.log(error);
+  const handleAddStock = async (stock) => {
+    const stockInfo = await fetchStockInfo(stock);
+    // const chartData = await chart(stock.ticker);
+
+    const positionData = {
+      ticker: stock.ticker,
+      quantity: 1,
+      cost: stockInfo.latestPrice,
+      // data: chartData,
+    };
+
+    const existingPosition = positions.find(
+      (position) => position.ticker === stock.ticker
+    );
+    if (existingPosition) {
+      updatePosition(existingPosition._id, {
+        ticker: stock.ticker,
+        quantity: existingPosition.quantity + 1,
+        cost: existingPosition.cost + stockInfo.latestPrice,
+      });
+    } else {
+      addPosition({
+        ticker: stock.ticker,
+        quantity: 1,
+        cost: stockInfo.latestPrice,
+      });
     }
+    dispatch(createPosition(positionData));
   };
 
-  const calculateTotalValue = (positions) => {
-    return positions.reduce((totalValue, position) => {
-      return totalValue + position.marketValue;
-    }, 0);
-  };
+  function calculateTotalValue(assets) {
+    if (!Array.isArray(assets) || assets.length === 0) {
+      return 0;
+    }
+    return assets.reduce(
+      (total, asset) => total + asset.price * asset.quantity,
+      0
+    );
+  }
 
-  const totalValue = calculateTotalValue(portfolio);
+  const totalValue = calculateTotalValue(positions);
 
   const calculatePortfolioWeight = (marketValue) => {
     return ((marketValue / totalValue) * 100).toFixed(2);
@@ -192,7 +162,7 @@ function Portfolio() {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {portfolio.map((position, index) => (
+                {positions.map((position, index) => (
                   <TableRow key={index}>
                     <TableCell>{position.ticker}</TableCell>
                     <TableCell>{position.numShares}</TableCell>
@@ -316,7 +286,7 @@ function Portfolio() {
                   <TableCell
                     style={{
                       backgroundColor:
-                        portfolio.reduce(
+                        positions.reduce(
                           (total, position) => total + position.dailyPnl,
                           0
                         ) >= 0
@@ -324,7 +294,7 @@ function Portfolio() {
                           : '#ffcdd2',
                     }}
                   >
-                    {portfolio
+                    {positions
                       .reduce((total, position) => total + position.dailyPnl, 0)
                       .toLocaleString('en-US', {
                         style: 'currency',
@@ -334,8 +304,8 @@ function Portfolio() {
                   <TableCell
                     style={{
                       backgroundColor:
-                        portfolio.length > 0 &&
-                        portfolio.reduce(
+                        positions.length > 0 &&
+                        positions.reduce(
                           (total, position) => total + position.dailyPnl,
                           0
                         ) /
@@ -345,9 +315,9 @@ function Portfolio() {
                           : '#ffcdd2',
                     }}
                   >
-                    {portfolio.length > 0 &&
+                    {positions.length > 0 &&
                       (
-                        portfolio.reduce(
+                        positions.reduce(
                           (total, position) => total + position.dailyPnl,
                           0
                         ) / totalValue
@@ -360,7 +330,7 @@ function Portfolio() {
                   <TableCell
                     style={{
                       backgroundColor:
-                        portfolio.reduce(
+                        positions.reduce(
                           (total, position) =>
                             total + position.overallPerformance,
                           0
@@ -369,7 +339,7 @@ function Portfolio() {
                           : '#ffcdd2',
                     }}
                   >
-                    {portfolio
+                    {positions
                       .reduce(
                         (total, position) =>
                           total + position.overallPerformance,
@@ -383,23 +353,23 @@ function Portfolio() {
                   <TableCell
                     style={{
                       backgroundColor:
-                        portfolio.length > 0 &&
-                        portfolio.reduce(
+                        positions.length > 0 &&
+                        positions.reduce(
                           (total, position) => total + position.overallPercent,
                           0
                         ) /
-                          portfolio.length >=
+                          positions.length >=
                           0
                           ? '#c8e6c9'
                           : '#ffcdd2',
                     }}
                   >
                     {(
-                      (portfolio.reduce(
+                      (positions.reduce(
                         (total, position) => total + position.overallPercent,
                         0
                       ) /
-                        portfolio.length) *
+                        positions.length) *
                       100
                     ).toFixed(2) + '%'}
                   </TableCell>
@@ -418,4 +388,11 @@ function Portfolio() {
     </div>
   );
 }
-export default Portfolio;
+
+const mapStateToProps = (state) => ({
+  positions: state.positions,
+});
+
+export default connect(mapStateToProps, { addPosition, updatePosition })(
+  Portfolio
+);
