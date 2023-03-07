@@ -2,7 +2,6 @@ import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import Spinner from '../components/Spinner';
-import Portfolio from '../components/Portfolio';
 
 function Dashboard() {
   const navigate = useNavigate();
@@ -32,7 +31,6 @@ function Dashboard() {
       <section className='heading'>
         <h1> Welcome {user && user.name} </h1>
         <p>Your Portfolio</p>
-        <Portfolio />
       </section>
     </>
   );

@@ -13,6 +13,7 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
+app.use('/api/tickers', require('./routes/tickerRoutes'));
 app.use('/api/users', require('./routes/userRoutes'));
 
 // Serve frontend
