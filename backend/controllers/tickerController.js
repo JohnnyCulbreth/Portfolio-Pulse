@@ -1,5 +1,6 @@
 const asyncHandler = require('express-async-handler');
 const Ticker = require('../models/tickerModel');
+const axios = require('axios');
 
 // @desc    Add a new ticker to user's portfolio
 // @route   POST /api/tickers
@@ -55,6 +56,22 @@ const getTickerById = asyncHandler(async (req, res) => {
   res.json(ticker);
 });
 
+// OR?
+
+const getTickerInfo = async (req, res, next) => {
+  const { symbol } = req.params;
+
+  try {
+    const response = await axios.get(
+      `https://api.iextrading.com/1.0/stock/${symbol}/batch?types=quote,news,chart&range=1m&last=1`
+    );
+
+    res.status(200).json(response.data);
+  } catch (error) {
+    next(error);
+  }
+};
+
 // @desc    Update a ticker in user's portfolio
 // @route   PUT /api/tickers/:id
 // @access  Private
@@ -101,6 +118,7 @@ const deleteTicker = asyncHandler(async (req, res) => {
 module.exports = {
   addTicker,
   getTickers,
+  getTickerInfo,
   getTickerById,
   updateTicker,
   deleteTicker,
