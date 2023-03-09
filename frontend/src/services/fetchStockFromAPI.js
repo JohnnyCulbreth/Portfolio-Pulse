@@ -1,4 +1,4 @@
-const key = `pk_b8445edb92244ad88a3de425568b1d07`;
+const key = process.env.IEX_API_KEY;
 
 export const fetchStockInfo = async function (stock) {
   try {

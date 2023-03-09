@@ -15,6 +15,10 @@ const userSchema = mongoose.Schema(
       type: String,
       required: [true, 'Please add a password'],
     },
+    portfolio: {
+      type: Array,
+      default: [],
+    },
   },
   {
     timestamps: true,

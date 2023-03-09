@@ -1,32 +1,55 @@
 const asyncHandler = require('express-async-handler');
+const User = require('../models/userModel');
 const Ticker = require('../models/tickerModel');
 const axios = require('axios');
+
+// FETCH Stock info
+const fetchStockInfo = async (stockSymbol) => {
+  const API_KEY = process.env.IEX_API_KEY;
+  const url = `https://cloud.iexapis.com/stable/stock/${stockSymbol}/quote?token=${API_KEY}`;
+  const response = await axios.get(url);
+  return response.data;
+};
 
 // @desc    Add a new ticker to user's portfolio
 // @route   POST /api/tickers
 // @access  Private
 const addTicker = asyncHandler(async (req, res) => {
-  const { user } = req;
   const { ticker, entryPrice, numShares } = req.body;
+  const { _id: userId } = req.user; // get user id from authenticated user
 
-  const tickerExists = await Ticker.findOne({ user: user._id, ticker });
+  const user = await User.findById(userId);
 
-  if (tickerExists) {
-    res.status(400);
-    throw new Error('Ticker already exists in portfolio');
-  }
-
-  const tickerData = new Ticker({
-    user: user._id,
+  const tickerObj = new Ticker({
+    user: req.user._id,
     ticker,
     entryPrice,
     numShares,
   });
 
-  const createdTicker = await tickerData.save();
+  const savedTicker = await tickerObj.save();
+  const stockInfo = await fetchStockInfo(savedTicker.ticker);
 
-  res.status(201).json(createdTicker);
+  if (!stockInfo || stockInfo.companyName === '') {
+    res.status(400);
+    throw new Error('Invalid ticker');
+  }
+
+  const newTicker = {
+    user: userId,
+    ticker: savedTicker.ticker,
+    entryPrice: savedTicker.entryPrice,
+    numShares: savedTicker.numShares,
+    stockInfo,
+  };
+
+  user.portfolio.push(newTicker);
+  await user.save();
+
+  res.status(201).json({ message: 'Ticker added to portfolio', newTicker });
 });
+
+module.exports = { addTicker };
 
 // @desc    Get all tickers in user's portfolio
 // @route   GET /api/tickers
