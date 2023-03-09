@@ -3,6 +3,9 @@ import axios from 'axios';
 
 const Portfolio = () => {
   const [portfolio, setPortfolio] = useState([]);
+  const [ticker, setTicker] = useState('');
+  const [numShares, setNumShares] = useState(0);
+  const [entryPrice, setEntryPrice] = useState(0);
 
   useEffect(() => {
     const user = JSON.parse(localStorage.getItem('user'));
@@ -23,17 +26,78 @@ const Portfolio = () => {
     fetchData();
   }, []);
 
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const user = JSON.parse(localStorage.getItem('user'));
+    const token = user.token;
+
+    const config = {
+      headers: {
+        Authorization: `Bearer ${token || ''}`,
+      },
+    };
+
+    const newTicker = {
+      ticker,
+      numShares,
+      entryPrice,
+    };
+
+    try {
+      const response = await axios.post('/api/tickers', newTicker, config);
+      setPortfolio([...portfolio, response.data]);
+      setTicker('');
+      setNumShares(0);
+      setEntryPrice(0);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   return (
     <div>
-      <h1>Portfolio</h1>
-      <ul>
-        {portfolio.map((ticker, index) => (
-          <li key={index}>
-            {ticker.ticker} - {ticker.numShares} shares at ${ticker.entryPrice}{' '}
-            per share
-          </li>
-        ))}
-      </ul>
+      {portfolio.length === 0 ? (
+        <p>Your Portfolio is empty</p>
+      ) : (
+        <ul>
+          {portfolio.map((ticker, index) => (
+            <li key={index}>
+              {ticker.ticker} - {ticker.numShares} shares at $
+              {ticker.entryPrice} per share
+            </li>
+          ))}
+        </ul>
+      )}
+      <form onSubmit={handleSubmit}>
+        <div>
+          <label htmlFor='ticker'>Ticker Symbol:</label>
+          <input
+            type='text'
+            id='ticker'
+            value={ticker}
+            onChange={(e) => setTicker(e.target.value)}
+          />
+        </div>
+        <div>
+          <label htmlFor='numShares'>Number of Shares:</label>
+          <input
+            type='number'
+            id='numShares'
+            value={numShares}
+            onChange={(e) => setNumShares(e.target.value)}
+          />
+        </div>
+        <div>
+          <label htmlFor='entryPrice'>Entry Price:</label>
+          <input
+            type='number'
+            id='entryPrice'
+            value={entryPrice}
+            onChange={(e) => setEntryPrice(e.target.value)}
+          />
+        </div>
+        <button type='submit'>Add Ticker</button>
+      </form>
     </div>
   );
 };
