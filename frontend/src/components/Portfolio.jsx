@@ -1,33 +1,21 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 
-const token = localStorage.getItem('token'); // get the JWT token from local storage
-
-const config = {
-  headers: {
-    Authorization: `Bearer ${token}`, // set the authorization header with the token
-  },
-};
-
-axios
-  .get('/api/users/me', config)
-  .then((response) => {
-    // handle the response
-  })
-  .catch((error) => {
-    // handle the error
-  });
-
 const Portfolio = () => {
   const [portfolio, setPortfolio] = useState([]);
 
   useEffect(() => {
+    const user = JSON.parse(localStorage.getItem('user'));
+    const token = user.token;
+
+    const config = {
+      headers: {
+        Authorization: `Bearer ${token || ''}`,
+      },
+    };
+
     const fetchData = async () => {
-      const response = await axios.get('/api/users/me', {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('authToken')}`,
-        },
-      });
+      const response = await axios.get('/api/users/me', config);
 
       setPortfolio(response.data.portfolio);
     };
@@ -39,8 +27,8 @@ const Portfolio = () => {
     <div>
       <h1>Portfolio</h1>
       <ul>
-        {portfolio.map((ticker) => (
-          <li key={ticker._id}>
+        {portfolio.map((ticker, index) => (
+          <li key={index}>
             {ticker.ticker} - {ticker.numShares} shares at ${ticker.entryPrice}{' '}
             per share
           </li>
