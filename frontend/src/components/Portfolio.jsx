@@ -1,5 +1,15 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
+import {
+  Table,
+  TableHead,
+  TableRow,
+  TableCell,
+  TableContainer,
+  Paper,
+  TableBody,
+  Button,
+} from '@mui/material';
 
 const Portfolio = () => {
   const [portfolio, setPortfolio] = useState([]);
@@ -56,48 +66,34 @@ const Portfolio = () => {
 
   return (
     <div>
-      {portfolio.length === 0 ? (
-        <p>Your Portfolio is empty</p>
-      ) : (
-        <ul>
-          {portfolio.map((ticker, index) => (
-            <li key={index}>
-              {ticker.ticker} - {ticker.numShares} shares at $
-              {ticker.entryPrice} per share
-            </li>
-          ))}
-        </ul>
-      )}
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label htmlFor='ticker'>Ticker Symbol:</label>
-          <input
-            type='text'
-            id='ticker'
-            value={ticker}
-            onChange={(e) => setTicker(e.target.value)}
-          />
-        </div>
-        <div>
-          <label htmlFor='numShares'>Number of Shares:</label>
-          <input
-            type='number'
-            id='numShares'
-            value={numShares}
-            onChange={(e) => setNumShares(e.target.value)}
-          />
-        </div>
-        <div>
-          <label htmlFor='entryPrice'>Entry Price:</label>
-          <input
-            type='number'
-            id='entryPrice'
-            value={entryPrice}
-            onChange={(e) => setEntryPrice(e.target.value)}
-          />
-        </div>
-        <button type='submit'>Add Ticker</button>
-      </form>
+      <TableContainer component={Paper} sx={{ marginTop: 10 }}>
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell>Ticker</TableCell>
+              <TableCell>Shares</TableCell>
+              <TableCell>Cost Basis</TableCell>
+              <TableCell>Market Price</TableCell>
+              <TableCell>Paid Value</TableCell>
+              <TableCell>Market Value</TableCell>
+              <TableCell>Daily PnL</TableCell>
+              <TableCell>Daily %</TableCell>
+              <TableCell>Overall Performance</TableCell>
+              <TableCell>Overall Performance %</TableCell>
+              <TableCell>Portfolio Weight %</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {portfolio.map((ticker, index) => (
+              <TableRow key={index}>
+                <TableCell>{ticker.ticker}</TableCell>
+                <TableCell>{ticker.numShares}</TableCell>
+                <TableCell>{ticker.entryPrice}</TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
     </div>
   );
 };
