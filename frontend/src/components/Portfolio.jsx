@@ -16,7 +16,8 @@ import TextField from '@mui/material/TextField';
 import { Container } from '@mui/system';
 
 const Portfolio = () => {
-  const key = process.env.IEX_API_KEY;
+  // const key = process.env.REACT_APP_IEX_API_KEY;
+  const key = 'pk_b8445edb92244ad88a3de425568b1d07';
 
   const fetchStockInfo = async function (stock) {
     try {
@@ -55,18 +56,6 @@ const Portfolio = () => {
     fetchData();
   }, []);
 
-  const handleTickerChange = (event) => {
-    setTicker(event.target.value);
-  };
-
-  const handleEntryPriceChange = (event) => {
-    setEntryPrice(event.target.value);
-  };
-
-  const handleNumSharesChange = (event) => {
-    setNumShares(event.target.value);
-  };
-
   const handleAddStock = async () => {
     const user = JSON.parse(localStorage.getItem('user'));
     const token = user.token;
@@ -88,7 +77,7 @@ const Portfolio = () => {
     const overallPerformance = marketValue - paidValue;
     const overallPercent = (marketValue - paidValue) / paidValue;
     const existingIndex = portfolio.findIndex(
-      (position) => position.ticker === ticker
+      (ticker) => ticker.ticker === ticker
     );
 
     const newTicker = {
@@ -145,18 +134,6 @@ const Portfolio = () => {
     }
   };
 
-  // const calculateTotalValue = (positions) => {
-  //   return positions.reduce((totalValue, position) => {
-  //     return totalValue + position.marketValue;
-  //   }, 0);
-  // };
-
-  // const totalValue = calculateTotalValue(portfolio);
-
-  // const calculatePortfolioWeight = (marketValue) => {
-  //   return ((marketValue / totalValue) * 100).toFixed(2);
-  // };
-
   return (
     <div>
       <Container
@@ -174,19 +151,19 @@ const Portfolio = () => {
             <TextField
               label='Ticker'
               value={ticker}
-              onChange={handleTickerChange}
+              onChange={(e) => setTicker(e.target.value)}
               sx={{ mr: 1 }}
             />
             <TextField
               label='Entry Price'
               value={entryPrice}
-              onChange={handleEntryPriceChange}
+              onChange={(e) => setEntryPrice(e.target.value)}
               sx={{ mr: 1 }}
             />
             <TextField
               label='Number of Shares'
               value={numShares}
-              onChange={handleNumSharesChange}
+              onChange={(e) => setNumShares(e.target.value)}
               sx={{ mr: 1 }}
             />
             <Button

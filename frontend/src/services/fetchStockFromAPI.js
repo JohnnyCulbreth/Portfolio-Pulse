@@ -1,4 +1,5 @@
-const key = process.env.IEX_API_KEY;
+// const key = process.env.REACT_APP_IEX_API_KEY;
+const key = pk_b8445edb92244ad88a3de425568b1d07;
 
 export const fetchStockInfo = async function (stock) {
   try {
