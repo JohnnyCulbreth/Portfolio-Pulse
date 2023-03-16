@@ -13,10 +13,24 @@ import {
 } from '@mui/material';
 import Box from '@mui/material/Box';
 import TextField from '@mui/material/TextField';
-import { fetchStockInfo } from '../services/fetchStockFromAPI';
 import { Container } from '@mui/system';
 
 const Portfolio = () => {
+  const key = process.env.IEX_API_KEY;
+
+  const fetchStockInfo = async function (stock) {
+    try {
+      const res = await fetch(
+        `https://cloud.iexapis.com/stable/stock/${stock.ticker}/quote?token=${key}`
+      );
+      const data = await res.json();
+      console.log('fetchStockInfo response:', data);
+      return data;
+    } catch (err) {
+      console.log(`${err.name} while fetching ${stock.ticker}`);
+    }
+  };
+
   const [portfolio, setPortfolio] = useState([]);
   const [ticker, setTicker] = useState('');
   const [numShares, setNumShares] = useState(0);
@@ -41,34 +55,6 @@ const Portfolio = () => {
     fetchData();
   }, []);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const user = JSON.parse(localStorage.getItem('user'));
-    const token = user.token;
-
-    const config = {
-      headers: {
-        Authorization: `Bearer ${token || ''}`,
-      },
-    };
-
-    const newTicker = {
-      ticker,
-      numShares,
-      entryPrice,
-    };
-
-    try {
-      const response = await axios.post('/api/tickers', newTicker, config);
-      setPortfolio([...portfolio, response.data]);
-      setTicker('');
-      setNumShares(0);
-      setEntryPrice(0);
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
   const handleTickerChange = (event) => {
     setTicker(event.target.value);
   };
@@ -82,20 +68,44 @@ const Portfolio = () => {
   };
 
   const handleAddStock = async () => {
+    const user = JSON.parse(localStorage.getItem('user'));
+    const token = user.token;
+
+    const config = {
+      headers: {
+        Authorization: `Bearer ${token || ''}`,
+      },
+    };
+
+    const stockInfo = await fetchStockInfo({ ticker });
+    const { latestPrice } = stockInfo;
+    const costBasis = (entryPrice * numShares) / numShares;
+    const marketPrice = latestPrice;
+    const paidValue = costBasis * numShares;
+    const marketValue = marketPrice * numShares;
+    const dailyPercent = (stockInfo.changePercent * 10).toFixed(2);
+    const dailyPnl = stockInfo.change * numShares;
+    const overallPerformance = marketValue - paidValue;
+    const overallPercent = (marketValue - paidValue) / paidValue;
+    const existingIndex = portfolio.findIndex(
+      (position) => position.ticker === ticker
+    );
+
+    const newTicker = {
+      ticker,
+      numShares,
+      entryPrice,
+      costBasis,
+      marketPrice,
+      paidValue,
+      marketValue,
+      dailyPnl,
+      dailyPercent,
+      overallPerformance,
+      overallPercent,
+    };
+
     try {
-      const stockInfo = await fetchStockInfo({ ticker });
-      const { latestPrice } = stockInfo;
-      const costBasis = (entryPrice * numShares) / numShares;
-      const marketPrice = latestPrice;
-      const paidValue = costBasis * numShares;
-      const marketValue = marketPrice * numShares;
-      const dailyPercent = (stockInfo.changePercent * 10).toFixed(2);
-      const dailyPnl = stockInfo.change * numShares;
-      const overallPerformance = marketValue - paidValue;
-      const overallPercent = (marketValue - paidValue) / paidValue;
-      const existingIndex = portfolio.findIndex(
-        (position) => position.ticker === ticker
-      );
       if (existingIndex >= 0) {
         const existingPosition = portfolio[existingIndex];
         const updatedPosition = {
@@ -118,55 +128,34 @@ const Portfolio = () => {
                   (existingPosition.paidValue + paidValue)) /
                 (existingPosition.paidValue + paidValue)
               : 0,
-          portfolioWeight: calculatePortfolioWeight(
-            existingPosition.marketValue + marketValue
-          ),
         };
         const updatedPortfolio = [...portfolio];
         updatedPortfolio[existingIndex] = updatedPosition;
         setPortfolio(updatedPortfolio);
       } else {
-        const totalValue = calculateTotalValue(
-          portfolio.concat([{ ticker, numShares, marketValue }])
-        );
-        const portfolioWeight = ((marketValue / totalValue) * 100).toFixed(2);
-        setPortfolio(
-          portfolio.concat([
-            {
-              ticker,
-              numShares,
-              costBasis,
-              marketPrice,
-              paidValue,
-              marketValue,
-              dailyPercent,
-              dailyPnl,
-              overallPerformance,
-              overallPercent,
-              portfolioWeight,
-            },
-          ])
-        );
+        const response = await axios.post('/api/tickers', newTicker, config);
+        setPortfolio([...portfolio, response.data]);
       }
+
       setTicker('');
-      setEntryPrice(0);
       setNumShares(0);
+      setEntryPrice(0);
     } catch (error) {
       console.log(error);
     }
   };
 
-  const calculateTotalValue = (positions) => {
-    return positions.reduce((totalValue, position) => {
-      return totalValue + position.marketValue;
-    }, 0);
-  };
+  // const calculateTotalValue = (positions) => {
+  //   return positions.reduce((totalValue, position) => {
+  //     return totalValue + position.marketValue;
+  //   }, 0);
+  // };
 
-  const totalValue = calculateTotalValue(portfolio);
+  // const totalValue = calculateTotalValue(portfolio);
 
-  const calculatePortfolioWeight = (marketValue) => {
-    return ((marketValue / totalValue) * 100).toFixed(2);
-  };
+  // const calculatePortfolioWeight = (marketValue) => {
+  //   return ((marketValue / totalValue) * 100).toFixed(2);
+  // };
 
   return (
     <div>
@@ -237,7 +226,15 @@ const Portfolio = () => {
                 <TableRow key={index}>
                   <TableCell>{ticker.ticker}</TableCell>
                   <TableCell>{ticker.numShares}</TableCell>
-                  <TableCell>{ticker.entryPrice}</TableCell>
+                  <TableCell>{ticker.costBasis}</TableCell>
+                  <TableCell>{ticker.marketPrice}</TableCell>
+                  <TableCell>{ticker.paidValue}</TableCell>
+                  <TableCell>{ticker.marketValue}</TableCell>
+                  <TableCell>{ticker.dailyPnl}</TableCell>
+                  <TableCell>{ticker.dailyPercent}</TableCell>
+                  <TableCell>{ticker.overallPerformance}</TableCell>
+                  <TableCell>{ticker.overallPercent}</TableCell>
+                  <TableCell>{ticker.portfolioWeight}</TableCell>
                 </TableRow>
               ))}
             </TableBody>

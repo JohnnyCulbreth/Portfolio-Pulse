@@ -29,6 +29,7 @@ const addTicker = asyncHandler(async (req, res) => {
 
   const savedTicker = await tickerObj.save();
   const stockInfo = await fetchStockInfo(savedTicker.ticker);
+  console.log(stockInfo);
 
   if (!stockInfo || stockInfo.companyName === '') {
     res.status(400);
