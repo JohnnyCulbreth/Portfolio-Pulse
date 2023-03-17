@@ -197,6 +197,12 @@ const Portfolio = () => {
     return accumulator + (ticker.marketValue || 0);
   }, 0);
 
+  const formatCurrency = (value) => {
+    return value < 0
+      ? `-$${Math.abs(value).toFixed(2)}`
+      : `$${value.toFixed(2)}`;
+  };
+
   return (
     <div>
       <Container
@@ -244,6 +250,7 @@ const Portfolio = () => {
             </Button>
           </Box>
         </Card>
+
         <TableContainer component={Paper} sx={{ marginTop: 5 }}>
           <Table>
             <TableHead>
@@ -277,29 +284,177 @@ const Portfolio = () => {
                   <TableRow key={index}>
                     <TableCell>{ticker.stockInfo.symbol}</TableCell>
                     <TableCell>{ticker.numShares}</TableCell>
-                    <TableCell>
-                      {ticker.entryPrice?.toFixed(2) ?? 'N/A'}
+                    <TableCell
+                      style={{
+                        backgroundColor: '#c8e6c9',
+                      }}
+                    >
+                      {ticker.entryPrice
+                        ? formatCurrency(ticker.entryPrice)
+                        : 'N/A'}
                     </TableCell>
-                    <TableCell>
-                      {ticker.stockInfo.latestPrice?.toFixed(2) ?? 'N/A'}
+                    <TableCell
+                      style={{
+                        backgroundColor: '#c8e6c9',
+                      }}
+                    >
+                      {ticker.stockInfo.latestPrice
+                        ? formatCurrency(ticker.stockInfo.latestPrice)
+                        : 'N/A'}
                     </TableCell>
-                    <TableCell>
-                      {(ticker.entryPrice * ticker.numShares)?.toFixed(2) ??
-                        'N/A'}
+                    <TableCell
+                      style={{
+                        backgroundColor: '#c8e6c9',
+                      }}
+                    >
+                      {ticker.entryPrice * ticker.numShares
+                        ? formatCurrency(ticker.entryPrice * ticker.numShares)
+                        : 'N/A'}
                     </TableCell>
-                    <TableCell>
-                      {(
-                        ticker.stockInfo.latestPrice * ticker.numShares
-                      )?.toFixed(2) ?? 'N/A'}
+                    <TableCell
+                      style={{
+                        backgroundColor: '#c8e6c9',
+                      }}
+                    >
+                      {ticker.stockInfo.latestPrice * ticker.numShares
+                        ? formatCurrency(
+                            ticker.stockInfo.latestPrice * ticker.numShares
+                          )
+                        : 'N/A'}
                     </TableCell>
-                    <TableCell>{dailyPnl.toFixed(2)}</TableCell>
-                    <TableCell>{(dailyPercent * 100).toFixed(2)}</TableCell>
-                    <TableCell>{overallPerformance.toFixed(2)}</TableCell>
-                    <TableCell>{overallPercent.toFixed(2)}</TableCell>
-                    <TableCell>{ticker.portfolioWeight.toFixed(2)}</TableCell>
+                    <TableCell
+                      style={{
+                        backgroundColor: dailyPnl >= 0 ? '#c8e6c9' : '#ffcdd2',
+                      }}
+                    >
+                      {formatCurrency(dailyPnl)}
+                    </TableCell>
+                    <TableCell
+                      style={{
+                        backgroundColor:
+                          dailyPercent >= 0 ? '#c8e6c9' : '#ffcdd2',
+                      }}
+                    >
+                      {`${(dailyPercent * 100).toFixed(2)}%`}
+                    </TableCell>
+                    <TableCell
+                      style={{
+                        backgroundColor:
+                          overallPerformance >= 0 ? '#c8e6c9' : '#ffcdd2',
+                      }}
+                    >
+                      {formatCurrency(overallPerformance)}
+                    </TableCell>
+                    <TableCell
+                      style={{
+                        backgroundColor:
+                          overallPercent >= 0 ? '#c8e6c9' : '#ffcdd2',
+                      }}
+                    >
+                      {`${overallPercent.toFixed(2)}%`}
+                    </TableCell>
+                    <TableCell>{`${ticker.portfolioWeight.toFixed(
+                      2
+                    )}%`}</TableCell>
                   </TableRow>
                 );
               })}
+            </TableBody>
+          </Table>
+        </TableContainer>
+
+        <TableContainer
+          component={Paper}
+          sx={{ marginTop: 5, marginBottom: 10 }}
+        >
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell>Daily PnL</TableCell>
+                <TableCell>Daily %</TableCell>
+                <TableCell>Portfolio PnL</TableCell>
+                <TableCell>Portfolio %</TableCell>
+                <TableCell>Portfolio Value</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              <TableRow>
+                <TableCell
+                  style={{
+                    backgroundColor:
+                      portfolio.reduce((acc, t) => acc + t.dailyPnl, 0) >= 0
+                        ? '#c8e6c9'
+                        : '#ffcdd2',
+                  }}
+                >
+                  {formatCurrency(
+                    portfolio.reduce((acc, t) => acc + t.dailyPnl, 0)
+                  )}
+                </TableCell>
+                <TableCell
+                  style={{
+                    backgroundColor:
+                      (portfolio.reduce((acc, t) => acc + t.dailyPnl, 0) /
+                        totalPortfolioValue) *
+                        100 >=
+                      0
+                        ? '#c8e6c9'
+                        : '#ffcdd2',
+                  }}
+                >
+                  {`${(
+                    (portfolio.reduce((acc, t) => acc + t.dailyPnl, 0) /
+                      totalPortfolioValue) *
+                    100
+                  ).toFixed(2)}%`}
+                </TableCell>
+                <TableCell
+                  style={{
+                    backgroundColor:
+                      portfolio.reduce(
+                        (acc, t) => acc + t.overallPerformance,
+                        0
+                      ) >= 0
+                        ? '#c8e6c9'
+                        : '#ffcdd2',
+                  }}
+                >
+                  {formatCurrency(
+                    portfolio.reduce((acc, t) => acc + t.overallPerformance, 0)
+                  )}
+                </TableCell>
+                <TableCell
+                  style={{
+                    backgroundColor:
+                      (portfolio.reduce(
+                        (acc, t) => acc + t.overallPerformance,
+                        0
+                      ) /
+                        totalPortfolioValue) *
+                        100 >=
+                      0
+                        ? '#c8e6c9'
+                        : '#ffcdd2',
+                  }}
+                >
+                  {`${(
+                    (portfolio.reduce(
+                      (acc, t) => acc + t.overallPerformance,
+                      0
+                    ) /
+                      totalPortfolioValue) *
+                    100
+                  ).toFixed(2)}%`}
+                </TableCell>
+                <TableCell
+                  style={{
+                    backgroundColor:
+                      totalPortfolioValue >= 0 ? '#c8e6c9' : '#ffcdd2',
+                  }}
+                >
+                  {formatCurrency(totalPortfolioValue)}
+                </TableCell>
+              </TableRow>
             </TableBody>
           </Table>
         </TableContainer>
