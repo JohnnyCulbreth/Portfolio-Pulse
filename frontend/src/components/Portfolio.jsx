@@ -25,7 +25,6 @@ const Portfolio = () => {
         `https://cloud.iexapis.com/stable/stock/${stock.ticker}/quote?token=${key}`
       );
       const data = res.data;
-      console.log('fetchStockInfo response:', data);
       return data;
     } catch (err) {
       console.log(`${err.name} while fetching ${stock.ticker}`);
@@ -49,8 +48,6 @@ const Portfolio = () => {
 
     const fetchData = async () => {
       const response = await axios.get('/api/users/me', config);
-
-      console.log('User portfolio data:', response.data.portfolio);
 
       const updatedPortfolio = await Promise.all(
         response.data.portfolio.map(async (position) => {
@@ -79,10 +76,9 @@ const Portfolio = () => {
 
     fetchData();
 
-    // Fetch the updated stock data every minute
     const intervalId = setInterval(() => {
       fetchData();
-    }, 60000); // 60000 milliseconds = 1 minute
+    }, 3600000);
 
     // Cleanup function to clear the interval when the component is unmounted
     return () => {
@@ -295,7 +291,10 @@ const Portfolio = () => {
                     </TableCell>
                     <TableCell
                       style={{
-                        backgroundColor: '#c8e6c9',
+                        backgroundColor:
+                          ticker.stockInfo.latestPrice > ticker.entryPrice
+                            ? '#c8e6c9'
+                            : '#ffcdd2',
                       }}
                     >
                       {ticker.stockInfo.latestPrice
@@ -313,7 +312,11 @@ const Portfolio = () => {
                     </TableCell>
                     <TableCell
                       style={{
-                        backgroundColor: '#c8e6c9',
+                        backgroundColor:
+                          ticker.stockInfo.latestPrice * ticker.numShares >
+                          ticker.entryPrice * ticker.numShares
+                            ? '#c8e6c9'
+                            : '#ffcdd2',
                       }}
                     >
                       {ticker.stockInfo.latestPrice * ticker.numShares
