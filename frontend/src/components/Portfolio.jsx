@@ -21,10 +21,10 @@ const Portfolio = () => {
 
   const fetchStockInfo = async function (stock) {
     try {
-      const res = await fetch(
+      const res = await axios.get(
         `https://cloud.iexapis.com/stable/stock/${stock.ticker}/quote?token=${key}`
       );
-      const data = await res.json();
+      const data = res.data;
       console.log('fetchStockInfo response:', data);
       return data;
     } catch (err) {
@@ -50,7 +50,14 @@ const Portfolio = () => {
     const fetchData = async () => {
       const response = await axios.get('/api/users/me', config);
 
-      setPortfolio(response.data.portfolio);
+      console.log('User portfolio data:', response.data.portfolio);
+      const mappedPortfolio = response.data.portfolio.map((position) => {
+        return {
+          ...position,
+          ...position.stockInfo,
+        };
+      });
+      setPortfolio(mappedPortfolio);
     };
 
     fetchData();
@@ -76,8 +83,10 @@ const Portfolio = () => {
     const dailyPnl = stockInfo.change * numShares;
     const overallPerformance = marketValue - paidValue;
     const overallPercent = (marketValue - paidValue) / paidValue;
-    const existingIndex = portfolio.findIndex(
-      (ticker) => ticker.ticker === ticker
+
+    const totalPortfolioValue = portfolio.reduce(
+      (accumulator, ticker) => accumulator + ticker.marketValue,
+      0
     );
 
     const newTicker = {
@@ -92,9 +101,14 @@ const Portfolio = () => {
       dailyPercent,
       overallPerformance,
       overallPercent,
+      portfolioWeight: (marketValue / totalPortfolioValue) * 100,
     };
 
     try {
+      const existingIndex = portfolio.findIndex(
+        (position) => position.ticker === newTicker.ticker
+      );
+
       if (existingIndex >= 0) {
         const existingPosition = portfolio[existingIndex];
         const updatedPosition = {
@@ -117,6 +131,10 @@ const Portfolio = () => {
                   (existingPosition.paidValue + paidValue)) /
                 (existingPosition.paidValue + paidValue)
               : 0,
+          portfolioWeight:
+            ((existingPosition.marketValue + marketValue) /
+              (totalPortfolioValue + marketValue)) *
+            100,
         };
         const updatedPortfolio = [...portfolio];
         updatedPortfolio[existingIndex] = updatedPosition;
@@ -133,6 +151,10 @@ const Portfolio = () => {
       console.log(error);
     }
   };
+
+  const totalPortfolioValue = portfolio.reduce((accumulator, ticker) => {
+    return accumulator + (ticker.marketValue || 0);
+  }, 0);
 
   return (
     <div>
@@ -199,21 +221,46 @@ const Portfolio = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {portfolio.map((ticker, index) => (
-                <TableRow key={index}>
-                  <TableCell>{ticker.ticker}</TableCell>
-                  <TableCell>{ticker.numShares}</TableCell>
-                  <TableCell>{ticker.costBasis}</TableCell>
-                  <TableCell>{ticker.marketPrice}</TableCell>
-                  <TableCell>{ticker.paidValue}</TableCell>
-                  <TableCell>{ticker.marketValue}</TableCell>
-                  <TableCell>{ticker.dailyPnl}</TableCell>
-                  <TableCell>{ticker.dailyPercent}</TableCell>
-                  <TableCell>{ticker.overallPerformance}</TableCell>
-                  <TableCell>{ticker.overallPercent}</TableCell>
-                  <TableCell>{ticker.portfolioWeight}</TableCell>
-                </TableRow>
-              ))}
+              {portfolio.map((ticker, index) => {
+                const dailyPnl = ticker.stockInfo.change * ticker.numShares;
+                const dailyPercent = ticker.stockInfo.changePercent;
+                const overallPerformance =
+                  ticker.stockInfo.latestPrice * ticker.numShares -
+                  ticker.entryPrice * ticker.numShares;
+                const overallPercent =
+                  (overallPerformance /
+                    (ticker.entryPrice * ticker.numShares)) *
+                  100;
+                const portfolioWeight =
+                  (ticker.marketValue / totalPortfolioValue) * 100;
+
+                return (
+                  <TableRow key={index}>
+                    <TableCell>{ticker.stockInfo.symbol}</TableCell>
+                    <TableCell>{ticker.numShares}</TableCell>
+                    <TableCell>
+                      {ticker.entryPrice?.toFixed(2) ?? 'N/A'}
+                    </TableCell>
+                    <TableCell>
+                      {ticker.stockInfo.latestPrice?.toFixed(2) ?? 'N/A'}
+                    </TableCell>
+                    <TableCell>
+                      {(ticker.entryPrice * ticker.numShares)?.toFixed(2) ??
+                        'N/A'}
+                    </TableCell>
+                    <TableCell>
+                      {(
+                        ticker.stockInfo.latestPrice * ticker.numShares
+                      )?.toFixed(2) ?? 'N/A'}
+                    </TableCell>
+                    <TableCell>{dailyPnl.toFixed(2)}</TableCell>
+                    <TableCell>{(dailyPercent * 100).toFixed(2)}</TableCell>
+                    <TableCell>{overallPerformance.toFixed(2)}</TableCell>
+                    <TableCell>{overallPercent.toFixed(2)}</TableCell>
+                    <TableCell>{portfolioWeight.toFixed(2)}</TableCell>
+                  </TableRow>
+                );
+              })}
             </TableBody>
           </Table>
         </TableContainer>
