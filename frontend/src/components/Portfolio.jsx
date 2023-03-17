@@ -51,16 +51,43 @@ const Portfolio = () => {
       const response = await axios.get('/api/users/me', config);
 
       console.log('User portfolio data:', response.data.portfolio);
-      const mappedPortfolio = response.data.portfolio.map((position) => {
-        return {
-          ...position,
-          ...position.stockInfo,
-        };
-      });
-      setPortfolio(mappedPortfolio);
+
+      const updatedPortfolio = await Promise.all(
+        response.data.portfolio.map(async (position) => {
+          const stockInfo = await fetchStockInfo({ ticker: position.ticker });
+          return {
+            ...position,
+            stockInfo,
+            marketPrice: stockInfo.latestPrice,
+            marketValue: stockInfo.latestPrice * position.numShares,
+            dailyPnl: stockInfo.change * position.numShares,
+            dailyPercent: stockInfo.changePercent * 100,
+            overallPerformance:
+              stockInfo.latestPrice * position.numShares -
+              position.entryPrice * position.numShares,
+            overallPercent:
+              ((stockInfo.latestPrice * position.numShares -
+                position.entryPrice * position.numShares) /
+                (position.entryPrice * position.numShares)) *
+              100,
+          };
+        })
+      );
+
+      setPortfolio(calculatePortfolioWeights(updatedPortfolio));
     };
 
     fetchData();
+
+    // Fetch the updated stock data every minute
+    const intervalId = setInterval(() => {
+      fetchData();
+    }, 60000); // 60000 milliseconds = 1 minute
+
+    // Cleanup function to clear the interval when the component is unmounted
+    return () => {
+      clearInterval(intervalId);
+    };
   }, []);
 
   const calculatePortfolioWeights = (updatedPortfolio) => {
@@ -245,8 +272,6 @@ const Portfolio = () => {
                   (overallPerformance /
                     (ticker.entryPrice * ticker.numShares)) *
                   100;
-                const portfolioWeight =
-                  (ticker.marketValue / totalPortfolioValue) * 100;
 
                 return (
                   <TableRow key={index}>
@@ -271,7 +296,7 @@ const Portfolio = () => {
                     <TableCell>{(dailyPercent * 100).toFixed(2)}</TableCell>
                     <TableCell>{overallPerformance.toFixed(2)}</TableCell>
                     <TableCell>{overallPercent.toFixed(2)}</TableCell>
-                    <TableCell>{portfolioWeight.toFixed(2)}</TableCell>
+                    <TableCell>{ticker.portfolioWeight.toFixed(2)}</TableCell>
                   </TableRow>
                 );
               })}
