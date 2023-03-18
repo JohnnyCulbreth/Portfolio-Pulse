@@ -13,6 +13,7 @@ import {
 } from '@mui/material';
 import Box from '@mui/material/Box';
 import TextField from '@mui/material/TextField';
+import { FaTrash } from 'react-icons/fa';
 import { Container } from '@mui/system';
 
 const Portfolio = () => {
@@ -247,7 +248,10 @@ const Portfolio = () => {
           </Box>
         </Card>
 
-        <TableContainer component={Paper} sx={{ marginTop: 5 }}>
+        <TableContainer
+          component={Paper}
+          sx={{ marginTop: 5, minWidth: '80vw' }}
+        >
           <Table>
             <TableHead>
               <TableRow>
@@ -262,6 +266,7 @@ const Portfolio = () => {
                 <TableCell>Overall Performance</TableCell>
                 <TableCell>Overall Performance %</TableCell>
                 <TableCell>Portfolio Weight %</TableCell>
+                <TableCell>Actions</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -359,6 +364,9 @@ const Portfolio = () => {
                     <TableCell>{`${ticker.portfolioWeight.toFixed(
                       2
                     )}%`}</TableCell>
+                    <TableCell>
+                      <FaTrash />
+                    </TableCell>
                   </TableRow>
                 );
               })}
@@ -368,7 +376,7 @@ const Portfolio = () => {
 
         <TableContainer
           component={Paper}
-          sx={{ marginTop: 5, marginBottom: 10 }}
+          sx={{ marginTop: 5, marginBottom: 10, minWidth: '80vw' }}
         >
           <Table>
             <TableHead>
