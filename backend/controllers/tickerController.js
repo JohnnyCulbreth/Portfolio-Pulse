@@ -30,7 +30,6 @@ const addTicker = asyncHandler(async (req, res) => {
 
   const savedTicker = await tickerObj.save();
   const stockInfo = await fetchStockInfo(savedTicker.ticker);
-  console.log(stockInfo);
 
   if (!stockInfo || stockInfo.companyName === '') {
     res.status(400);
@@ -42,13 +41,13 @@ const addTicker = asyncHandler(async (req, res) => {
     ticker: savedTicker.ticker,
     entryPrice: savedTicker.entryPrice,
     numShares: savedTicker.numShares,
+    latestPrice: stockInfo.latestPrice,
+    change: stockInfo.change,
+    changePercent: stockInfo.changePercent,
     stockInfo,
   };
 
-  user.portfolio.push(newTicker);
-  await user.save();
-
-  res.status(201).json({ message: 'Ticker added to portfolio', newTicker });
+  res.status(201).json({ newTicker });
 });
 
 module.exports = { addTicker };
