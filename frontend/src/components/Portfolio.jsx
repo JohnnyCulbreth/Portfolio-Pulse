@@ -13,31 +13,29 @@ import {
 } from '@mui/material';
 import Box from '@mui/material/Box';
 import TextField from '@mui/material/TextField';
-import { FaTrash } from 'react-icons/fa';
 import { Container } from '@mui/system';
+import { FaTrash } from 'react-icons/fa';
 
 const Portfolio = () => {
   // const key = process.env.REACT_APP_IEX_API_KEY;
   const key = 'pk_b8445edb92244ad88a3de425568b1d07';
 
-  const fetchStockInfo = async function (ticker) {
+  const fetchStockInfo = async function (stock) {
     try {
       const res = await axios.get(
-        `https://cloud.iexapis.com/stable/stock/${ticker}/quote?token=${key}`
+        `https://cloud.iexapis.com/stable/stock/${stock.ticker}/quote?token=${key}`
       );
       const data = res.data;
       return data;
     } catch (err) {
-      console.log(`${err.name} while fetching ${ticker}`);
+      console.log(`${err.name} while fetching ${stock.ticker}`);
     }
   };
 
-  const [loading, setLoading] = useState(false);
   const [portfolio, setPortfolio] = useState([]);
   const [ticker, setTicker] = useState('');
   const [numShares, setNumShares] = useState(0);
   const [entryPrice, setEntryPrice] = useState(0);
-  const [loadingPortfolio, setLoadingPortfolio] = useState(true);
 
   useEffect(() => {
     const user = JSON.parse(localStorage.getItem('user'));
@@ -54,12 +52,9 @@ const Portfolio = () => {
 
       const updatedPortfolio = await Promise.all(
         response.data.portfolio.map(async (position) => {
-          const stockInfo = await fetchStockInfo(position.ticker);
-
+          const stockInfo = await fetchStockInfo({ ticker: position.ticker });
           return {
             ...position,
-            entryPrice: parseFloat(position.entryPrice), // Convert entryPrice to numeric value
-            numShares: parseInt(position.numShares, 10), // Convert numShares to numeric value
             stockInfo,
             marketPrice: stockInfo.latestPrice,
             marketValue: stockInfo.latestPrice * position.numShares,
@@ -78,7 +73,6 @@ const Portfolio = () => {
       );
 
       setPortfolio(calculatePortfolioWeights(updatedPortfolio));
-      setLoadingPortfolio(false);
     };
 
     fetchData();
@@ -108,7 +102,6 @@ const Portfolio = () => {
   };
 
   const handleAddStock = async () => {
-    setLoadingPortfolio(true);
     const user = JSON.parse(localStorage.getItem('user'));
     const token = user.token;
 
@@ -118,86 +111,82 @@ const Portfolio = () => {
       },
     };
 
-    const stockInfo = await fetchStockInfo(ticker);
+    const stockInfo = await fetchStockInfo({ ticker });
     const { latestPrice } = stockInfo;
+    const costBasis = (entryPrice * numShares) / numShares;
+    const marketPrice = latestPrice;
+    const paidValue = costBasis * numShares;
+    const marketValue = marketPrice * numShares;
+    const dailyPercent = (stockInfo.changePercent * 10).toFixed(2);
+    const dailyPnl = stockInfo.change * numShares;
+    const overallPerformance = marketValue - paidValue;
+    const overallPercent = (marketValue - paidValue) / paidValue;
 
-    if (entryPrice) {
-      const costBasis = parseFloat(entryPrice); // No need to divide and multiply here
-      const marketPrice = latestPrice;
-      const paidValue = costBasis * numShares;
-      const marketValue = marketPrice * numShares;
-      const dailyPercent = (stockInfo.changePercent * 100).toFixed(2);
-      const dailyPnl = stockInfo.change * numShares;
-      const overallPerformance = marketValue - paidValue;
-      const overallPercent = (overallPerformance / paidValue) * 100;
+    const totalPortfolioValue = portfolio.reduce(
+      (accumulator, ticker) => accumulator + ticker.marketValue,
+      0
+    );
 
-      const newTicker = {
-        ticker,
-        numShares: parseInt(numShares, 10), // Convert numShares to numeric value
-        entryPrice: parseFloat(entryPrice), // Convert entryPrice to numeric value
-        costBasis,
-        marketPrice,
-        paidValue,
-        marketValue,
-        dailyPnl,
-        dailyPercent,
-        overallPerformance,
-        overallPercent,
-      };
+    const newTicker = {
+      ticker,
+      numShares,
+      entryPrice,
+      costBasis,
+      marketPrice,
+      paidValue,
+      marketValue,
+      dailyPnl,
+      dailyPercent,
+      overallPerformance,
+      overallPercent,
+      portfolioWeight: (marketValue / totalPortfolioValue) * 100,
+    };
 
-      try {
-        const existingIndex = portfolio.findIndex(
-          (position) => position.ticker === newTicker.ticker
-        );
+    try {
+      const existingIndex = portfolio.findIndex(
+        (position) => position.ticker === newTicker.ticker
+      );
 
-        if (existingIndex >= 0) {
-          // Use calculatePortfolioWeights() to update the portfolio weights after making changes
-          const updatedPortfolio = [...portfolio];
-          updatedPortfolio[existingIndex] = {
-            ...updatedPortfolio[existingIndex],
-            ...newTicker,
-            numShares: updatedPortfolio[existingIndex].numShares + numShares,
-            paidValue: updatedPortfolio[existingIndex].paidValue + paidValue,
-            marketValue:
-              updatedPortfolio[existingIndex].marketValue + marketValue,
-          };
-          setPortfolio(calculatePortfolioWeights(updatedPortfolio));
-        } else {
-          const response = await axios.post('/api/tickers', newTicker, config);
-          const addedStock = response.data.newTicker;
-
-          const addedTicker = {
-            ...addedStock,
-            costBasis: addedStock.entryPrice || 0,
-            marketPrice: addedStock.latestPrice || 0,
-            paidValue: (addedStock.entryPrice || 0) * addedStock.numShares,
-            marketValue: (addedStock.latestPrice || 0) * addedStock.numShares,
-            dailyPnl: (addedStock.change || 0) * addedStock.numShares,
-            dailyPercent: ((addedStock.changePercent || 0) * 100).toFixed(2),
-            overallPerformance:
-              (addedStock.latestPrice || 0) * addedStock.numShares -
-              (addedStock.entryPrice || 0) * addedStock.numShares,
-            overallPercent:
-              (((addedStock.latestPrice || 0) * addedStock.numShares -
-                (addedStock.entryPrice || 0) * addedStock.numShares) /
-                ((addedStock.entryPrice || 0) * addedStock.numShares)) *
-              100,
-          };
-
-          setPortfolio(calculatePortfolioWeights([...portfolio, addedTicker]));
-        }
-
-        setTicker('');
-        setNumShares(0);
-        setEntryPrice(0);
-      } catch (error) {
-        console.log(error);
-      } finally {
-        setLoadingPortfolio(false);
+      if (existingIndex >= 0) {
+        const existingPosition = portfolio[existingIndex];
+        const updatedPosition = {
+          ...existingPosition,
+          numShares: Number(existingPosition.numShares) + Number(numShares),
+          costBasis:
+            (existingPosition.paidValue + paidValue) /
+            (Number(existingPosition.numShares) + Number(numShares)),
+          marketPrice: marketPrice,
+          paidValue: existingPosition.paidValue + paidValue,
+          marketValue: existingPosition.marketValue + marketValue,
+          dailyPercent: dailyPercent,
+          dailyPnl: existingPosition.dailyPnl + dailyPnl,
+          overallPerformance:
+            existingPosition.overallPerformance + overallPerformance,
+          overallPercent:
+            existingPosition.paidValue + paidValue !== 0
+              ? (existingPosition.marketValue +
+                  marketValue -
+                  (existingPosition.paidValue + paidValue)) /
+                (existingPosition.paidValue + paidValue)
+              : 0,
+          portfolioWeight:
+            ((existingPosition.marketValue + marketValue) /
+              (totalPortfolioValue + marketValue)) *
+            100,
+        };
+        const updatedPortfolio = [...portfolio];
+        updatedPortfolio[existingIndex] = updatedPosition;
+        setPortfolio(calculatePortfolioWeights(updatedPortfolio));
+      } else {
+        const response = await axios.post('/api/tickers', newTicker, config);
+        setPortfolio([...portfolio, response.data]);
       }
-    } else {
-      console.log('Entry price is not defined');
-      setLoadingPortfolio(false);
+
+      setTicker('');
+      setNumShares(0);
+      setEntryPrice(0);
+    } catch (error) {
+      console.log(error);
     }
   };
 
@@ -206,24 +195,9 @@ const Portfolio = () => {
   }, 0);
 
   const formatCurrency = (value) => {
-    if (typeof value !== 'number') {
-      console.error('Invalid value passed to formatCurrency:', value);
-      return '-';
-    }
-
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-    }).format(value);
-  };
-
-  const formatPercentage = (value) => {
-    if (typeof value !== 'number') {
-      console.error('Invalid value passed to formatPercentage:', value);
-      return '-';
-    }
-
-    return `${(value * 100).toFixed(2)}%`;
+    return value < 0
+      ? `-$${Math.abs(value).toFixed(2)}`
+      : `$${value.toFixed(2)}`;
   };
 
   return (
@@ -296,118 +270,106 @@ const Portfolio = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {loadingPortfolio ? (
-                <TableRow>
-                  <TableCell colSpan={12} align='center'>
-                    Loading stock data...
-                  </TableCell>
-                </TableRow>
-              ) : (
-                portfolio.map((ticker, index) => {
-                  const dailyPnl =
-                    (ticker.stockInfo?.change || 0) * ticker.numShares;
-                  const dailyPercent = ticker.stockInfo?.changePercent || 0;
-                  const overallPerformance =
-                    (ticker.stockInfo?.latestPrice || 0) * ticker.numShares -
-                    ticker.entryPrice * ticker.numShares;
-                  const overallPercent =
-                    (overallPerformance /
-                      (ticker.entryPrice * ticker.numShares)) *
-                    100;
+              {portfolio.map((ticker, index) => {
+                const dailyPnl = ticker.stockInfo.change * ticker.numShares;
+                const dailyPercent = ticker.stockInfo.changePercent;
+                const overallPerformance =
+                  ticker.stockInfo.latestPrice * ticker.numShares -
+                  ticker.entryPrice * ticker.numShares;
+                const overallPercent =
+                  (overallPerformance /
+                    (ticker.entryPrice * ticker.numShares)) *
+                  100;
 
-                  return (
-                    <TableRow key={index}>
-                      <TableCell>{ticker.stockInfo?.symbol || 'N/A'}</TableCell>
-                      <TableCell>{ticker.numShares}</TableCell>
-                      <TableCell
-                        style={{
-                          backgroundColor: '#c8e6c9',
-                        }}
-                      >
-                        {ticker.entryPrice
-                          ? formatCurrency(ticker.entryPrice)
-                          : 'N/A'}
-                      </TableCell>
-                      <TableCell
-                        style={{
-                          backgroundColor:
-                            (ticker.stockInfo?.latestPrice || 0) >
-                            ticker.entryPrice
-                              ? '#c8e6c9'
-                              : '#ffcdd2',
-                        }}
-                      >
-                        {ticker.stockInfo?.latestPrice
-                          ? formatCurrency(ticker.stockInfo.latestPrice)
-                          : 'N/A'}
-                      </TableCell>
-                      <TableCell
-                        style={{
-                          backgroundColor: '#c8e6c9',
-                        }}
-                      >
-                        {ticker.entryPrice * ticker.numShares || 'N/A'}
-                      </TableCell>
-
-                      <TableCell
-                        style={{
-                          backgroundColor:
-                            (ticker.stockInfo?.latestPrice || 0) *
-                              ticker.numShares >
-                            ticker.entryPrice * ticker.numShares
-                              ? '#c8e6c9'
-                              : '#ffcdd2',
-                        }}
-                      >
-                        {ticker.stockInfo?.latestPrice
-                          ? formatCurrency(
-                              ticker.stockInfo.latestPrice * ticker.numShares
-                            )
-                          : 'N/A'}
-                      </TableCell>
-                      <TableCell
-                        style={{
-                          backgroundColor:
-                            dailyPnl >= 0 ? '#c8e6c9' : '#ffcdd2',
-                        }}
-                      >
-                        {formatCurrency(dailyPnl)}
-                      </TableCell>
-                      <TableCell
-                        style={{
-                          backgroundColor:
-                            dailyPercent >= 0 ? '#c8e6c9' : '#ffcdd2',
-                        }}
-                      >
-                        {`${(dailyPercent * 100).toFixed(2)}%`}
-                      </TableCell>
-                      <TableCell
-                        style={{
-                          backgroundColor:
-                            overallPerformance >= 0 ? '#c8e6c9' : '#ffcdd2',
-                        }}
-                      >
-                        {formatCurrency(overallPerformance)}
-                      </TableCell>
-                      <TableCell
-                        style={{
-                          backgroundColor:
-                            overallPercent >= 0 ? '#c8e6c9' : '#ffcdd2',
-                        }}
-                      >
-                        {`${overallPercent.toFixed(2)}%`}
-                      </TableCell>
-                      <TableCell>{`${(ticker.portfolioWeight || 0).toFixed(
-                        2
-                      )}%`}</TableCell>
-
-                      <TableCell>
-                        <FaTrash />
-                      </TableCell>
-                    </TableRow>
-                  );
-                })
-              )}
+                return (
+                  <TableRow key={index}>
+                    <TableCell>{ticker.stockInfo.symbol}</TableCell>
+                    <TableCell>{ticker.numShares}</TableCell>
+                    <TableCell
+                      style={{
+                        backgroundColor: '#c8e6c9',
+                      }}
+                    >
+                      {ticker.entryPrice
+                        ? formatCurrency(ticker.entryPrice)
+                        : 'N/A'}
+                    </TableCell>
+                    <TableCell
+                      style={{
+                        backgroundColor:
+                          ticker.stockInfo.latestPrice > ticker.entryPrice
+                            ? '#c8e6c9'
+                            : '#ffcdd2',
+                      }}
+                    >
+                      {ticker.stockInfo.latestPrice
+                        ? formatCurrency(ticker.stockInfo.latestPrice)
+                        : 'N/A'}
+                    </TableCell>
+                    <TableCell
+                      style={{
+                        backgroundColor: '#c8e6c9',
+                      }}
+                    >
+                      {ticker.entryPrice * ticker.numShares
+                        ? formatCurrency(ticker.entryPrice * ticker.numShares)
+                        : 'N/A'}
+                    </TableCell>
+                    <TableCell
+                      style={{
+                        backgroundColor:
+                          ticker.stockInfo.latestPrice * ticker.numShares >
+                          ticker.entryPrice * ticker.numShares
+                            ? '#c8e6c9'
+                            : '#ffcdd2',
+                      }}
+                    >
+                      {ticker.stockInfo.latestPrice * ticker.numShares
+                        ? formatCurrency(
+                            ticker.stockInfo.latestPrice * ticker.numShares
+                          )
+                        : 'N/A'}
+                    </TableCell>
+                    <TableCell
+                      style={{
+                        backgroundColor: dailyPnl >= 0 ? '#c8e6c9' : '#ffcdd2',
+                      }}
+                    >
+                      {formatCurrency(dailyPnl)}
+                    </TableCell>
+                    <TableCell
+                      style={{
+                        backgroundColor:
+                          dailyPercent >= 0 ? '#c8e6c9' : '#ffcdd2',
+                      }}
+                    >
+                      {`${(dailyPercent * 100).toFixed(2)}%`}
+                    </TableCell>
+                    <TableCell
+                      style={{
+                        backgroundColor:
+                          overallPerformance >= 0 ? '#c8e6c9' : '#ffcdd2',
+                      }}
+                    >
+                      {formatCurrency(overallPerformance)}
+                    </TableCell>
+                    <TableCell
+                      style={{
+                        backgroundColor:
+                          overallPercent >= 0 ? '#c8e6c9' : '#ffcdd2',
+                      }}
+                    >
+                      {`${overallPercent.toFixed(2)}%`}
+                    </TableCell>
+                    <TableCell>{`${ticker.portfolioWeight.toFixed(
+                      2
+                    )}%`}</TableCell>
+                    <TableCell>
+                      <FaTrash />
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
             </TableBody>
           </Table>
         </TableContainer>
