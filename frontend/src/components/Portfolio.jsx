@@ -283,11 +283,16 @@ const Portfolio = () => {
 
                 return (
                   <TableRow key={index}>
-                    <TableCell>{ticker.stockInfo.symbol}</TableCell>
-                    <TableCell>{ticker.numShares}</TableCell>
+                    <TableCell style={{ textAlign: 'center' }}>
+                      {ticker.stockInfo.symbol}
+                    </TableCell>
+                    <TableCell style={{ textAlign: 'center' }}>
+                      {ticker.numShares}
+                    </TableCell>
                     <TableCell
                       style={{
                         backgroundColor: '#c8e6c9',
+                        textAlign: 'center',
                       }}
                     >
                       {ticker.entryPrice
@@ -300,6 +305,7 @@ const Portfolio = () => {
                           ticker.stockInfo.latestPrice > ticker.entryPrice
                             ? '#c8e6c9'
                             : '#ffcdd2',
+                        textAlign: 'center',
                       }}
                     >
                       {ticker.stockInfo.latestPrice
@@ -309,6 +315,7 @@ const Portfolio = () => {
                     <TableCell
                       style={{
                         backgroundColor: '#c8e6c9',
+                        textAlign: 'center',
                       }}
                     >
                       {ticker.entryPrice * ticker.numShares
@@ -322,6 +329,7 @@ const Portfolio = () => {
                           ticker.entryPrice * ticker.numShares
                             ? '#c8e6c9'
                             : '#ffcdd2',
+                        textAlign: 'center',
                       }}
                     >
                       {ticker.stockInfo.latestPrice * ticker.numShares
@@ -333,6 +341,7 @@ const Portfolio = () => {
                     <TableCell
                       style={{
                         backgroundColor: dailyPnl >= 0 ? '#c8e6c9' : '#ffcdd2',
+                        textAlign: 'center',
                       }}
                     >
                       {formatCurrency(dailyPnl)}
@@ -341,6 +350,7 @@ const Portfolio = () => {
                       style={{
                         backgroundColor:
                           dailyPercent >= 0 ? '#c8e6c9' : '#ffcdd2',
+                        textAlign: 'center',
                       }}
                     >
                       {`${(dailyPercent * 100).toFixed(2)}%`}
@@ -349,6 +359,7 @@ const Portfolio = () => {
                       style={{
                         backgroundColor:
                           overallPerformance >= 0 ? '#c8e6c9' : '#ffcdd2',
+                        textAlign: 'center',
                       }}
                     >
                       {formatCurrency(overallPerformance)}
@@ -357,14 +368,15 @@ const Portfolio = () => {
                       style={{
                         backgroundColor:
                           overallPercent >= 0 ? '#c8e6c9' : '#ffcdd2',
+                        textAlign: 'center',
                       }}
                     >
                       {`${overallPercent.toFixed(2)}%`}
                     </TableCell>
-                    <TableCell>{`${ticker.portfolioWeight.toFixed(
-                      2
-                    )}%`}</TableCell>
-                    <TableCell>
+                    <TableCell
+                      style={{ textAlign: 'center' }}
+                    >{`${ticker.portfolioWeight.toFixed(2)}%`}</TableCell>
+                    <TableCell style={{ textAlign: 'center' }}>
                       <FaTrash />
                     </TableCell>
                   </TableRow>
@@ -381,11 +393,17 @@ const Portfolio = () => {
           <Table>
             <TableHead>
               <TableRow>
-                <TableCell>Daily PnL</TableCell>
-                <TableCell>Daily %</TableCell>
-                <TableCell>Portfolio PnL</TableCell>
-                <TableCell>Portfolio %</TableCell>
-                <TableCell>Portfolio Value</TableCell>
+                <TableCell style={{ textAlign: 'center' }}>Daily PnL</TableCell>
+                <TableCell style={{ textAlign: 'center' }}>Daily %</TableCell>
+                <TableCell style={{ textAlign: 'center' }}>
+                  Portfolio PnL
+                </TableCell>
+                <TableCell style={{ textAlign: 'center' }}>
+                  Portfolio %
+                </TableCell>
+                <TableCell style={{ textAlign: 'center' }}>
+                  Portfolio Value
+                </TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -396,6 +414,7 @@ const Portfolio = () => {
                       portfolio.reduce((acc, t) => acc + t.dailyPnl, 0) >= 0
                         ? '#c8e6c9'
                         : '#ffcdd2',
+                    textAlign: 'center',
                   }}
                 >
                   {formatCurrency(
@@ -411,6 +430,7 @@ const Portfolio = () => {
                       0
                         ? '#c8e6c9'
                         : '#ffcdd2',
+                    textAlign: 'center',
                   }}
                 >
                   {`${(
@@ -428,6 +448,7 @@ const Portfolio = () => {
                       ) >= 0
                         ? '#c8e6c9'
                         : '#ffcdd2',
+                    textAlign: 'center',
                   }}
                 >
                   {formatCurrency(
@@ -446,6 +467,7 @@ const Portfolio = () => {
                       0
                         ? '#c8e6c9'
                         : '#ffcdd2',
+                    textAlign: 'center',
                   }}
                 >
                   {`${(
@@ -461,6 +483,7 @@ const Portfolio = () => {
                   style={{
                     backgroundColor:
                       totalPortfolioValue >= 0 ? '#c8e6c9' : '#ffcdd2',
+                    textAlign: 'center',
                   }}
                 >
                   {formatCurrency(totalPortfolioValue)}
