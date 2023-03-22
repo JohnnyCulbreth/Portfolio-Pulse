@@ -18,7 +18,7 @@ import { FaTrash } from 'react-icons/fa';
 
 const Portfolio = () => {
   // const key = process.env.REACT_APP_IEX_API_KEY;
-  const key = 'pk_b8445edb92244ad88a3de425568b1d07';
+  const key = 'pk_c227bbfffc334f619036e0e3d8679fb5';
 
   const fetchStockInfo = async function (stock) {
     try {
