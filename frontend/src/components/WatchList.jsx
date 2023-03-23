@@ -1,27 +1,44 @@
 import React from 'react';
 import StockChart from './StockChart';
+import StockAnalysis from './StockAnalysis';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
-import Grid from '@mui/material/Grid';
 
 const WatchList = ({ portfolio }) => {
   return (
-    <Grid
-      container
-      spacing={3}
-      className='watchlist'
-      sx={{ paddingBottom: '5%' }}
-    >
-      {portfolio.map((stock) => (
-        <Grid item key={stock.ticker} xs={12} sm={6} md={4}>
-          <Card>
-            <CardContent>
-              <StockChart stock={{ symbol: stock.ticker }} />
-            </CardContent>
-          </Card>
-        </Grid>
-      ))}
-    </Grid>
+    <>
+      <h1> Your Positions: </h1>
+      <div
+        className='watchlist'
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          paddingBottom: '5%',
+        }}
+      >
+        {portfolio.map((stock) => (
+          <div key={stock.ticker} style={{ marginBottom: '1rem' }}>
+            <Card
+              style={{
+                display: 'flex',
+                flexDirection: 'row',
+                minWidth: '80vw',
+                minHeight: '30vw',
+                height: '30vw',
+              }}
+            >
+              <CardContent style={{ flex: '1 1 0', height: '100%' }}>
+                <StockChart stock={{ symbol: stock.ticker }} />
+              </CardContent>
+              <CardContent style={{ flex: '1 1 0', height: '100%' }}>
+                <StockAnalysis stock={{ symbol: stock.ticker }} />
+              </CardContent>
+            </Card>
+          </div>
+        ))}
+      </div>
+    </>
   );
 };
 

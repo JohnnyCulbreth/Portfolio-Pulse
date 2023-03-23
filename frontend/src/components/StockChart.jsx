@@ -1,26 +1,66 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
+
+let tvScriptLoadingPromise;
 
 const StockChart = ({ stock }) => {
-  const renderStockChartIframe = () => {
-    const html = `
-    <div id="tradingview_b9e96-wrapper"
-    style="position: relative;box-sizing: content-box;width: 240px;height: 150px;margin: 0 auto !important;padding: 0 !important;font-family:Arial,sans-serif;">
-    <div style="width: 240px;height: 150px;background: transparent;padding: 0 !important;"><iframe
-        id="tradingview_b9e96"
-        src="https://s.tradingview.com/widgetembed/?frameElementId=tradingview_b9e96&amp;symbol=${stock.symbol}&amp;interval=5&amp;hidetoptoolbar=1&amp;hidelegend=1&amp;saveimage=0&amp;toolbarbg=f1f3f6&amp;studies=%5B%5D&amp;theme=light&amp;style=1&amp;timezone=America%2FNew_York&amp;studies_overrides=%7B%7D&amp;overrides=%7B%7D&amp;enabled_features=%5B%5D&amp;disabled_features=%5B%5D&amp;locale=en&amp;utm_source=127.0.0.1&amp;utm_medium=widget&amp;utm_campaign=chart&amp;utm_term=${stock.symbol}"
-        style="width: 100%; height: 100%; margin: 0 !important; padding: 0 !important;" frameborder="0"
-        allowtransparency="true" scrolling="no" allowfullscreen=""></iframe></div>
-    </div>
-    `;
+  const onLoadScriptRef = useRef();
 
-    return { __html: html };
-  };
+  useEffect(() => {
+    onLoadScriptRef.current = createWidget;
+
+    if (!tvScriptLoadingPromise) {
+      tvScriptLoadingPromise = new Promise((resolve) => {
+        const script = document.createElement('script');
+        script.id = 'tradingview-widget-loading-script';
+        script.src = 'https://s3.tradingview.com/tv.js';
+        script.type = 'text/javascript';
+        script.onload = resolve;
+
+        document.head.appendChild(script);
+      });
+    }
+
+    tvScriptLoadingPromise.then(
+      () => onLoadScriptRef.current && onLoadScriptRef.current()
+    );
+
+    return () => (onLoadScriptRef.current = null);
+
+    function createWidget() {
+      if (
+        document.getElementById(`tradingview_${stock.symbol}`) &&
+        'TradingView' in window
+      ) {
+        new window.TradingView.widget({
+          autosize: true,
+          symbol: stock.symbol,
+          interval: '5',
+          timezone: 'America/New_York',
+          theme: 'light',
+          style: '1',
+          locale: 'en',
+          toolbar_bg: '#f1f3f6',
+          enable_publishing: false,
+          hide_top_toolbar: true,
+          hide_legend: true,
+          save_image: false,
+          container_id: `tradingview_${stock.symbol}`,
+        });
+      }
+    }
+  }, [stock.symbol]);
 
   return (
-    <div
-      className='stock-chart'
-      dangerouslySetInnerHTML={renderStockChartIframe()}
-    ></div>
+    <div className='tradingview-widget-container' style={{ height: '100%' }}>
+      <div id={`tradingview_${stock.symbol}`} style={{ height: '100%' }} />
+      <div className='tradingview-widget-copyright'>
+        <a
+          href={`https://www.tradingview.com/symbols/${stock.symbol}/`}
+          rel='noopener'
+          target='_blank'
+        ></a>
+      </div>
+    </div>
   );
 };
 
