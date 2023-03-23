@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import axios from 'axios';
 import {
   Table,
@@ -16,7 +16,7 @@ import TextField from '@mui/material/TextField';
 import { Container } from '@mui/system';
 import { FaTrash } from 'react-icons/fa';
 
-const Portfolio = () => {
+const Portfolio = ({ portfolio, setPortfolio }) => {
   // const key = process.env.REACT_APP_IEX_API_KEY;
   const key = 'pk_c227bbfffc334f619036e0e3d8679fb5';
 
@@ -32,60 +32,9 @@ const Portfolio = () => {
     }
   };
 
-  const [portfolio, setPortfolio] = useState([]);
   const [ticker, setTicker] = useState('');
   const [numShares, setNumShares] = useState(0);
   const [entryPrice, setEntryPrice] = useState(0);
-
-  useEffect(() => {
-    const user = JSON.parse(localStorage.getItem('user'));
-    const token = user.token;
-
-    const config = {
-      headers: {
-        Authorization: `Bearer ${token || ''}`,
-      },
-    };
-
-    const fetchData = async () => {
-      const response = await axios.get('/api/users/me', config);
-
-      const updatedPortfolio = await Promise.all(
-        response.data.portfolio.map(async (position) => {
-          const stockInfo = await fetchStockInfo({ ticker: position.ticker });
-          return {
-            ...position,
-            stockInfo,
-            marketPrice: stockInfo.latestPrice,
-            marketValue: stockInfo.latestPrice * position.numShares,
-            dailyPnl: stockInfo.change * position.numShares,
-            dailyPercent: stockInfo.changePercent * 100,
-            overallPerformance:
-              stockInfo.latestPrice * position.numShares -
-              position.entryPrice * position.numShares,
-            overallPercent:
-              ((stockInfo.latestPrice * position.numShares -
-                position.entryPrice * position.numShares) /
-                (position.entryPrice * position.numShares)) *
-              100,
-          };
-        })
-      );
-
-      setPortfolio(calculatePortfolioWeights(updatedPortfolio));
-    };
-
-    fetchData();
-
-    const intervalId = setInterval(() => {
-      fetchData();
-    }, 3600000);
-
-    // Cleanup function to clear the interval when the component is unmounted
-    return () => {
-      clearInterval(intervalId);
-    };
-  }, []);
 
   const calculatePortfolioWeights = (updatedPortfolio) => {
     const totalPortfolioValue = updatedPortfolio.reduce(
