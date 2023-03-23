@@ -8,7 +8,12 @@ const WatchList = () => {
   const stocks = ['AAPL', 'TSLA', 'GOOGL', 'AMZN', 'MSFT'];
 
   return (
-    <Grid container spacing={3} className='watchlist'>
+    <Grid
+      container
+      spacing={3}
+      className='watchlist'
+      sx={{ paddingBottom: '5%' }}
+    >
       {stocks.map((symbol) => (
         <Grid item key={symbol} xs={12} sm={6} md={4}>
           <Card>
