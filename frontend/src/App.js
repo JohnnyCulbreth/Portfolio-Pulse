@@ -10,8 +10,7 @@ function App() {
   return (
     <>
       <Router>
-        <div className='container'>
-          <Header />
+        <div className='hero-container'>
           <Routes>
             <Route path='/' element={<Dashboard />} />
             <Route path='/login' element={<Login />} />
