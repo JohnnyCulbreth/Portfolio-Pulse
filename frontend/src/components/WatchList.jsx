@@ -26,6 +26,7 @@ const WatchList = ({ portfolio }) => {
                 minWidth: '80vw',
                 minHeight: '30vw',
                 height: '30vw',
+                opacity: '90%',
               }}
             >
               <CardContent style={{ flex: '1 1 0', height: '100%' }}>

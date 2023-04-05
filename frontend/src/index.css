@@ -65,20 +65,21 @@ h3 {
 
 .header ul li a svg {
   margin-right: 5px;
-}
+} */
 
 .heading {
   font-size: 2rem;
   font-weight: 700;
   margin-bottom: 50px;
   padding: 0 20px;
+  text-align: center;
 }
 
 .heading p {
-  color: #828282;
+  color: white;
 }
 
-.tickers {
+/* .tickers {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 10px;
@@ -98,11 +99,11 @@ h3 {
   cursor: pointer;
   border: none;
   background: none;
-}
+} */
 
 .form,
 .content {
-  width: 70%;
+  width: 40%;
   margin: 0 auto;
 }
 
@@ -161,7 +162,7 @@ h3 {
   transform: scale(0.98);
 }
 
-.loadingSpinnerContainer {
+/* .loadingSpinnerContainer {
   position: fixed;
   top: 0;
   right: 0;
@@ -210,9 +211,6 @@ h3 {
   position: relative;
   z-index: 2;
   width: 100%;
-  max-width: 960px;
   margin: 0 auto;
   padding: 0 20px;
-  text-align: center;
-  /* Add any other styles you need for the content, such as width, height, etc. */
 }

@@ -12,7 +12,7 @@ a {
 }
 
 a:hover {
-  color: #34e5a6;
+  color: #b6c67b;
   text-decoration: none;
 }
 
@@ -419,7 +419,7 @@ h6 {
 }
 
 #hero .btn-get-started:hover {
-  background: #17b57d;
+  background: #728630;
 }
 
 #hero .animated {

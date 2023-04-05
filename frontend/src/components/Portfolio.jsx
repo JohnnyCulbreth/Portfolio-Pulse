@@ -161,7 +161,7 @@ const Portfolio = ({ portfolio, setPortfolio }) => {
           mt: 5,
         }}
       >
-        <Card sx={{ minWidth: 300 }}>
+        <Card sx={{ minWidth: 300, opacity: '90%' }}>
           <Box sx={{ display: 'flex', alignItems: 'center', p: 2 }}>
             <TextField
               label='Ticker'
@@ -199,7 +199,7 @@ const Portfolio = ({ portfolio, setPortfolio }) => {
 
         <TableContainer
           component={Paper}
-          sx={{ marginTop: 5, minWidth: '80vw' }}
+          sx={{ marginTop: 5, minWidth: '80vw', opacity: '90%' }}
         >
           <Table>
             <TableHead>
@@ -337,7 +337,12 @@ const Portfolio = ({ portfolio, setPortfolio }) => {
 
         <TableContainer
           component={Paper}
-          sx={{ marginTop: 5, marginBottom: 10, minWidth: '80vw' }}
+          sx={{
+            marginTop: 5,
+            marginBottom: 10,
+            minWidth: '80vw',
+            opacity: '90%',
+          }}
         >
           <Table>
             <TableHead>
