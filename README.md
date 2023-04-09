@@ -25,4 +25,4 @@ In summary, Portfolio Pulse is a comprehensive stock portfolio management applic
 <img width="1439" alt="Screen Shot 2023-04-09 at 6 02 27 PM" src="https://user-images.githubusercontent.com/102640510/230800579-c74d6311-4ab4-4b1c-b17a-9f7bf1e6a4f7.png">
 <img width="1438" alt="Screen Shot 2023-04-09 at 6 03 12 PM" src="https://user-images.githubusercontent.com/102640510/230800583-82c8e847-170c-4837-8b9e-a07df02df912.png">
 <img width="1438" alt="Screen Shot 2023-04-09 at 6 04 20 PM" src="https://user-images.githubusercontent.com/102640510/230800584-d856ef32-e949-4ca0-8233-f4bdcb06df4b.png">
-<img width="1439" alt="Screen Shot 2023-04-09 at 6 05 12 PM" src="https://user-images.githubusercontent.com/102640510/230800588-4ad60dfc-328a-4131-bb4e-066df4b574ba.png">
+<img width="1439" alt="Screen Shot 2023-04-09 at 6 07 04 PM" src="https://user-images.githubusercontent.com/102640510/230800619-1c06e7fb-8f7c-44c0-8d45-1514428492c4.png">
