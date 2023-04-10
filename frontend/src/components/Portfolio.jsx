@@ -40,13 +40,20 @@ const Portfolio = ({ portfolio, setPortfolio }) => {
   const calculatePortfolioWeights = (updatedPortfolio) => {
     const totalPortfolioValue = updatedPortfolio.reduce(
       (accumulator, ticker) => {
-        return accumulator + (ticker.marketValue || 0);
+        return accumulator + (Number(ticker.marketValue) || 0);
       },
       0
     );
 
     return updatedPortfolio.map((ticker) => {
-      const portfolioWeight = (ticker.marketValue / totalPortfolioValue) * 100;
+      let portfolioWeight = 0;
+      if (
+        !isNaN(ticker.marketValue) &&
+        !isNaN(totalPortfolioValue) &&
+        totalPortfolioValue > 0
+      ) {
+        portfolioWeight = (ticker.marketValue / totalPortfolioValue) * 100;
+      }
       return { ...ticker, portfolioWeight };
     });
   };
@@ -131,10 +138,20 @@ const Portfolio = ({ portfolio, setPortfolio }) => {
         updatedPortfolio[existingIndex] = updatedPosition;
       } else {
         const response = await axios.post('/api/tickers', newTicker, config);
-        updatedPortfolio = [...portfolio, response.data];
+        const responseData = {
+          ...response.data,
+          marketValue,
+          entryPrice: parseFloat(response.data.entryPrice),
+          numShares: parseInt(response.data.numShares),
+          ticker: response.data.ticker,
+          user: response.data.user,
+          stockInfo: response.data.stockInfo,
+        };
+        updatedPortfolio = [...portfolio, responseData];
       }
 
       setPortfolio(calculatePortfolioWeights(updatedPortfolio));
+      console.log('Updated portfolio:', updatedPortfolio);
 
       setTicker('');
       setNumShares(0);

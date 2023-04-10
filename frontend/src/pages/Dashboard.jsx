@@ -32,13 +32,20 @@ function Dashboard() {
   const calculatePortfolioWeights = (updatedPortfolio) => {
     const totalPortfolioValue = updatedPortfolio.reduce(
       (accumulator, ticker) => {
-        return accumulator + (ticker.marketValue || 0);
+        return accumulator + (Number(ticker.marketValue) || 0);
       },
       0
     );
 
     return updatedPortfolio.map((ticker) => {
-      const portfolioWeight = (ticker.marketValue / totalPortfolioValue) * 100;
+      let portfolioWeight = 0;
+      if (
+        !isNaN(ticker.marketValue) &&
+        !isNaN(totalPortfolioValue) &&
+        totalPortfolioValue > 0
+      ) {
+        portfolioWeight = (ticker.marketValue / totalPortfolioValue) * 100;
+      }
       return { ...ticker, portfolioWeight };
     });
   };
@@ -96,9 +103,9 @@ function Dashboard() {
   return (
     <>
       <section className='heading'>
-        <h1> Welcome {user && user.name} </h1>
+        <h2> Welcome {user && user.name} </h2>
         <Portfolio portfolio={portfolio} setPortfolio={setPortfolio} />
-        {/* <WatchList portfolio={portfolio} /> */}
+        <WatchList portfolio={portfolio} />
       </section>
     </>
   );
