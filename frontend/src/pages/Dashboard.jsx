@@ -98,7 +98,7 @@ function Dashboard() {
       <section className='heading'>
         <h1> Welcome {user && user.name} </h1>
         <Portfolio portfolio={portfolio} setPortfolio={setPortfolio} />
-        <WatchList portfolio={portfolio} />
+        {/* <WatchList portfolio={portfolio} /> */}
       </section>
     </>
   );

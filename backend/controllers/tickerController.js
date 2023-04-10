@@ -48,7 +48,7 @@ const addTicker = asyncHandler(async (req, res) => {
   user.portfolio.push(newTicker);
   await user.save();
 
-  res.status(201).json({ message: 'Ticker added to portfolio', newTicker });
+  res.status(201).json(newTicker);
 });
 
 module.exports = { addTicker };

@@ -17,6 +17,7 @@ import { Container } from '@mui/system';
 import { FaTrash } from 'react-icons/fa';
 
 const Portfolio = ({ portfolio, setPortfolio }) => {
+  console.log('Portfolio component rendering');
   // const key = process.env.REACT_APP_IEX_API_KEY;
   const key = 'pk_c227bbfffc334f619036e0e3d8679fb5';
 
@@ -51,6 +52,7 @@ const Portfolio = ({ portfolio, setPortfolio }) => {
   };
 
   const handleAddStock = async () => {
+    console.log('handleAddStock called');
     const user = JSON.parse(localStorage.getItem('user'));
     const token = user.token;
 
@@ -96,6 +98,8 @@ const Portfolio = ({ portfolio, setPortfolio }) => {
         (position) => position.ticker === newTicker.ticker
       );
 
+      let updatedPortfolio;
+
       if (existingIndex >= 0) {
         const existingPosition = portfolio[existingIndex];
         const updatedPosition = {
@@ -123,13 +127,14 @@ const Portfolio = ({ portfolio, setPortfolio }) => {
               (totalPortfolioValue + marketValue)) *
             100,
         };
-        const updatedPortfolio = [...portfolio];
+        updatedPortfolio = [...portfolio];
         updatedPortfolio[existingIndex] = updatedPosition;
-        setPortfolio(calculatePortfolioWeights(updatedPortfolio));
       } else {
         const response = await axios.post('/api/tickers', newTicker, config);
-        setPortfolio([...portfolio, response.data]);
+        updatedPortfolio = [...portfolio, response.data];
       }
+
+      setPortfolio(calculatePortfolioWeights(updatedPortfolio));
 
       setTicker('');
       setNumShares(0);
@@ -220,6 +225,9 @@ const Portfolio = ({ portfolio, setPortfolio }) => {
             </TableHead>
             <TableBody>
               {portfolio.map((ticker, index) => {
+                if (!ticker.stockInfo) {
+                  return null;
+                }
                 const dailyPnl = ticker.stockInfo.change * ticker.numShares;
                 const dailyPercent = ticker.stockInfo.changePercent;
                 const overallPerformance =
