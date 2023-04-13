@@ -126,16 +126,28 @@ const updateTicker = asyncHandler(async (req, res) => {
 // @access  Private
 const deleteTicker = asyncHandler(async (req, res) => {
   const { user } = req;
-  const { id } = req.params;
+  const { ticker } = req.params;
 
-  const tickerToDelete = await Ticker.findOne({ _id: id, user: user._id });
+  const tickerToDelete = await Ticker.findOne({
+    ticker: { $regex: `^${ticker}$`, $options: 'i' },
+    user: user._id,
+  });
 
   if (!tickerToDelete) {
     res.status(404);
     throw new Error('Ticker not found');
   }
 
+  // Remove the ticker from the Ticker collection
   await tickerToDelete.remove();
+  console.log('Ticker removed:', tickerToDelete);
+
+  // Remove the ticker from the user's portfolio array
+  const userToUpdate = await User.findById(user._id);
+  userToUpdate.portfolio = userToUpdate.portfolio.filter(
+    (item) => item.ticker !== tickerToDelete.ticker
+  );
+  await userToUpdate.save();
 
   res.json({ message: 'Ticker removed from portfolio' });
 });

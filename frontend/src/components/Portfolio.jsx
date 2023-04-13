@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import {
   Table,
@@ -36,6 +36,10 @@ const Portfolio = ({ portfolio, setPortfolio }) => {
   const [ticker, setTicker] = useState('');
   const [numShares, setNumShares] = useState(0);
   const [entryPrice, setEntryPrice] = useState(0);
+
+  useEffect(() => {
+    console.log('Portfolio state changed:', portfolio);
+  }, [portfolio]);
 
   const calculatePortfolioWeights = (updatedPortfolio) => {
     const totalPortfolioValue = updatedPortfolio.reduce(
@@ -156,6 +160,36 @@ const Portfolio = ({ portfolio, setPortfolio }) => {
       setTicker('');
       setNumShares(0);
       setEntryPrice(0);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const handleDeleteStock = async (tickerSymbol) => {
+    console.log('Deleting stock with ticker:', tickerSymbol);
+
+    const user = JSON.parse(localStorage.getItem('user'));
+    const token = user.token;
+
+    const config = {
+      headers: {
+        Authorization: `Bearer ${token || ''}`,
+      },
+    };
+
+    try {
+      const response = await axios.delete(
+        `/api/tickers/${tickerSymbol}`,
+        config
+      );
+      console.log('API response:', response);
+
+      const updatedPortfolio = portfolio.filter(
+        (position) => position.ticker !== tickerSymbol
+      );
+      console.log('Updated portfolio:', updatedPortfolio);
+      setPortfolio(calculatePortfolioWeights(updatedPortfolio));
+      console.log('Current portfolio state:', portfolio);
     } catch (error) {
       console.log(error);
     }
@@ -351,7 +385,11 @@ const Portfolio = ({ portfolio, setPortfolio }) => {
                       style={{ textAlign: 'center' }}
                     >{`${ticker.portfolioWeight.toFixed(2)}%`}</TableCell>
                     <TableCell style={{ textAlign: 'center' }}>
-                      <FaTrash />
+                      <FaTrash
+                        onClick={() => {
+                          handleDeleteStock(ticker.stockInfo.symbol);
+                        }}
+                      />
                     </TableCell>
                   </TableRow>
                 );
