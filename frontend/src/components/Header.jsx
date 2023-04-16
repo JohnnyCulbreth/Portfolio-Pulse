@@ -15,32 +15,43 @@ function Header() {
   };
 
   return (
-    <header className='header'>
-      <div className='logo'>
-        <Link to='/'>Portfolio Pulse</Link>
+    <header
+      id='header'
+      className='fixed-top d-flex align-items-center header-transparent'
+    >
+      <div className='container d-flex align-items-center justify-content-between'>
+        <div className='logo'>
+          <h1>
+            <Link to='/'>Portfolio Pulse</Link>
+          </h1>
+        </div>
+
+        <nav id='navbar' className='navbar'>
+          <ul>
+            <li>
+              <Link className='nav-link scrollto active' to='/'>
+                Home
+              </Link>
+            </li>
+            {user ? (
+              <li>
+                <Link className='nav-link scrollto' onClick={onLogout} to='/'>
+                  Logout
+                </Link>
+              </li>
+            ) : (
+              <>
+                <li>
+                  <Link className='nav-link scrollto' to='/register'>
+                    Register
+                  </Link>
+                </li>
+              </>
+            )}
+          </ul>
+          <i className='bi bi-list mobile-nav-toggle'></i>
+        </nav>
       </div>
-      <ul>
-        {user ? (
-          <li>
-            <button className='btn' onClick={onLogout}>
-              <FaSignOutAlt /> Logout
-            </button>
-          </li>
-        ) : (
-          <>
-            <li>
-              <Link to='/login'>
-                <FaSignInAlt /> Login
-              </Link>
-            </li>
-            <li>
-              <Link to='/register'>
-                <FaUser /> Register
-              </Link>
-            </li>
-          </>
-        )}
-      </ul>
     </header>
   );
 }

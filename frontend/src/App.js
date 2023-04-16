@@ -12,6 +12,7 @@ function App() {
     <>
       <Router>
         <div className='hero-container'>
+          <Header />
           <Routes>
             <Route path='/' element={<Landing />} />
             <Route path='/dashboard' element={<Dashboard />} />
