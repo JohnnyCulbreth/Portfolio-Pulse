@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { FaSignInAlt } from 'react-icons/fa';
+import { AiOutlineStock } from 'react-icons/ai';
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
@@ -59,7 +59,7 @@ function Login() {
     <>
       <section className='heading'>
         <h1>
-          <FaSignInAlt /> Log in
+          <AiOutlineStock /> Log in
         </h1>
         <p>Log in to start building your portfolio</p>
       </section>
@@ -89,7 +89,24 @@ function Login() {
             />
           </div>
           <div className='form-group'>
-            <button typeof='submit' className='btn btn-block'>
+            <button
+              typeof='submit'
+              className='btn btn-block'
+              style={{
+                backgroundColor: '#7fa136',
+                fontFamily: 'Montserrat, sans-serif',
+                fontWeight: '500',
+                fontSize: '16px',
+                letterSpacing: '1px',
+                display: 'inlineBlock',
+                padding: '10px 30px',
+                borderRadius: '50px',
+                transition: '0.5s',
+                color: '#fff',
+                width: '30%',
+                margin: 'auto',
+              }}
+            >
               Submit
             </button>
           </div>

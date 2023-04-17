@@ -118,7 +118,24 @@ function Register() {
             />
           </div>
           <div className='form-group'>
-            <button type='submit' className='btn btn-block'>
+            <button
+              type='submit'
+              className='btn btn-block'
+              style={{
+                backgroundColor: '#7fa136',
+                fontFamily: 'Montserrat, sans-serif',
+                fontWeight: '500',
+                fontSize: '16px',
+                letterSpacing: '1px',
+                display: 'inlineBlock',
+                padding: '10px 30px',
+                borderRadius: '50px',
+                transition: '0.5s',
+                color: '#fff',
+                width: '30%',
+                margin: 'auto',
+              }}
+            >
               Submit
             </button>
           </div>

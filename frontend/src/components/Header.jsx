@@ -1,3 +1,4 @@
+import React, { useState, useEffect } from 'react';
 import { FaSignInAlt, FaSignOutAlt, FaUser } from 'react-icons/fa';
 import { Link, useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
@@ -8,6 +9,24 @@ function Header() {
   const dispatch = useDispatch();
   const { user } = useSelector((state) => state.auth);
 
+  const [scrolled, setScrolled] = useState(false);
+
+  const handleScroll = () => {
+    const offset = window.scrollY;
+    if (offset > 50) {
+      setScrolled(true);
+    } else {
+      setScrolled(false);
+    }
+  };
+
+  useEffect(() => {
+    window.addEventListener('scroll', handleScroll);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, []);
+
   const onLogout = () => {
     dispatch(logout());
     dispatch(reset());
@@ -17,7 +36,15 @@ function Header() {
   return (
     <header
       id='header'
-      className='fixed-top d-flex align-items-center header-transparent'
+      className={`fixed-top d-flex align-items-center header-transparent ${
+        scrolled ? 'header-scrolled' : ''
+      }`}
+      style={{
+        height: scrolled ? '60px' : '80px',
+        transition: 'all 0.5s',
+        zIndex: '997',
+        backgroundColor: 'rgba(1, 4, 136, 0.9)',
+      }}
     >
       <div className='container d-flex align-items-center justify-content-between'>
         <div className='logo'>
