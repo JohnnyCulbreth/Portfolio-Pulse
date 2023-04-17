@@ -8,6 +8,7 @@ import axios from 'axios';
 function Dashboard() {
   const navigate = useNavigate();
 
+  // const key = process.env.REACT_APP_IEX_API_KEY;
   const key = 'pk_c227bbfffc334f619036e0e3d8679fb5';
 
   const fetchStockInfo = async function (stock) {

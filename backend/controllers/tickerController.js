@@ -5,7 +5,7 @@ const axios = require('axios');
 
 // FETCH Stock info
 const fetchStockInfo = async (stockSymbol) => {
-  // const API_KEY = process.env.IEX_API_KEY;
+  // const API_KEY = process.env.REACT_APP_IEX_API_KEY;
   const API_KEY = 'pk_c227bbfffc334f619036e0e3d8679fb5';
   const url = `https://cloud.iexapis.com/stable/stock/${stockSymbol}/quote?token=${API_KEY}`;
   const response = await axios.get(url);
