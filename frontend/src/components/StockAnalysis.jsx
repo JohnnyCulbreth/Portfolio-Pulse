@@ -46,7 +46,7 @@ const StockAnalysis = ({ stock }) => {
       <div className='tradingview-widget-copyright'>
         <a
           href={`https://www.tradingview.com/symbols/${stock.symbol}/technicals/`}
-          rel='noopener'
+          rel='noreferrer'
           target='_blank'
         ></a>
       </div>

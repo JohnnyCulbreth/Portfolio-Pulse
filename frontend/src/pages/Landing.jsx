@@ -23,7 +23,11 @@ const Landing = () => {
           data-aos='zoom-out'
           data-aos-delay={300}
         >
-          <img src='assets/img/pulse2.png' className='img-fluid animated' alt />
+          <img
+            src='assets/img/pulse2.png'
+            className='img-fluid animated'
+            alt=''
+          />
         </div>
       </div>
     </div>

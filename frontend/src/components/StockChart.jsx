@@ -56,7 +56,7 @@ const StockChart = ({ stock }) => {
       <div className='tradingview-widget-copyright'>
         <a
           href={`https://www.tradingview.com/symbols/${stock.symbol}/`}
-          rel='noopener'
+          rel='noreferrer'
           target='_blank'
         ></a>
       </div>
