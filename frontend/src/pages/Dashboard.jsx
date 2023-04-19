@@ -104,7 +104,7 @@ function Dashboard() {
   return (
     <>
       <section className='heading'>
-        <h2> Welcome {user && user.name} </h2>
+        <h1> Welcome {user && user.name} </h1>
         <Portfolio portfolio={portfolio} setPortfolio={setPortfolio} />
         <WatchList portfolio={portfolio} />
       </section>
