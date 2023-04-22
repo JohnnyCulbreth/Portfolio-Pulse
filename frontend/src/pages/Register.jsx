@@ -63,7 +63,7 @@ function Register() {
   }
 
   return (
-    <>
+    <div style={{ alignItems: 'center', height: '63vh' }}>
       <section className='heading'>
         <h1>
           <FaUser /> Register
@@ -141,7 +141,7 @@ function Register() {
           </div>
         </form>
       </section>
-    </>
+    </div>
   );
 }
 

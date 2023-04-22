@@ -56,7 +56,7 @@ function Login() {
   }
 
   return (
-    <>
+    <div style={{ alignItems: 'center', height: '53vh', marginTop: '10vh' }}>
       <section className='heading'>
         <h1>
           <AiOutlineStock /> Log in
@@ -112,7 +112,7 @@ function Login() {
           </div>
         </form>
       </section>
-    </>
+    </div>
   );
 }
 
