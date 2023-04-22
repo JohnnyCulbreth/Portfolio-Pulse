@@ -9,7 +9,7 @@ function Dashboard() {
   const navigate = useNavigate();
 
   // const key = process.env.REACT_APP_IEX_API_KEY;
-  const key = 'pk_c227bbfffc334f619036e0e3d8679fb5';
+  const key = 'pk_417e21df67634240aaeae995c9f760df';
 
   const fetchStockInfo = async function (stock) {
     try {
